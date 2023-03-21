@@ -28,10 +28,6 @@ export function useFirestoreQuery(
     limit(limitNumber)
   );
 
-  if (onlyUser && userAuthInfo) {
-    q = query(q, where(userIdField, "==", userAuthInfo.uid));
-  }
-
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
