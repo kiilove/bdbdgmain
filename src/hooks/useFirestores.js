@@ -19,10 +19,7 @@ export function useFirestoreQuery(
   conditions = [],
   orderByField = "",
   orderByDirection = "asc",
-  limitNumber = 0,
-  onlyUser = false,
-  userIdField = "userId",
-  userAuthInfo = null
+  limitNumber = 0
 ) {
   let q = query(
     collection(db, collectionName),
