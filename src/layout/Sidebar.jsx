@@ -72,7 +72,7 @@ const Sidebar = () => {
   return (
     <div
       className="flex flex-col  rounded-lg w-96 p-10 gap-y-2"
-      style={{ backgroundColor: "rgba(16,26,66,1)" }}
+      style={{ backgroundColor: "rgba(16,26,66,0.7)" }}
     >
       <div className="flex w-full h-20">
         <span className="text-gray-100 text-2xl font-bold">BDBDg협회</span>
@@ -80,7 +80,9 @@ const Sidebar = () => {
       {Menus.map((menu, idx) => (
         <div key={menu.index} className="flex flex-col font-bold text-lg">
           <div
-            className="flex w-full h-10 justify-start items-center hover:bg-gray-600 hover:text-white  text-gray-300 rounded-lg px-3"
+            className={`${
+              menuVisible.index === menu.index && "bg-blue-900 "
+            } flex w-full h-10 justify-start items-center hover:bg-gray-600 hover:text-white  text-gray-300 rounded-lg px-3`}
             onClick={() => handleMenuClick(idx)}
           >
             <div className="flex justify-between w-full items-center">
