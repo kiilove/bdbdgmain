@@ -63,7 +63,7 @@ const Sidebar = () => {
   return (
     <div
       className="flex flex-col  rounded-lg w-96 p-10 gap-y-2"
-      style={{ backgroundColor: "rgba(16,26,66,0.7)" }}
+      style={{ backgroundColor: "rgba(16,26,66,0.7)", minHeight: "800px" }}
     >
       <div className="flex w-full h-20">
         <span className="text-gray-100 text-2xl font-bold">BDBDg협회</span>

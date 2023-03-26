@@ -108,16 +108,19 @@ const StartPage = () => {
 
   return (
     <div className="flex w-full h-screen bg-transparent flex-col">
-      <div className="flex w-full h-1/3 flex-col p-10">
+      <div className="flex w-full h-1/2 flex-col p-10">
         <div className="flex w-full h-full justify-center items-center flex-col gap-y-5">
-          <h1 className="text-white lg:text-4xl font-extrabold w-full text-center align-middle">
+          <h1 className="text-white md:text-2xl lg:text-4xl font-extrabold w-full text-center align-middle">
             대회 개설을 준비합니다.
           </h1>{" "}
-          <h1 className="text-white lg:text-4xl font-extrabold w-full text-center align-middle">
-            개설 준비가 완료되면 다음 페이지로 자동으로 이동합니다.
+          <h1 className="text-white md:text-2xl lg:text-4xl font-extrabold w-full text-center align-middle">
+            개설 준비가 완료되면
+          </h1>{" "}
+          <h1 className="text-white md:text-2xl lg:text-4xl font-extrabold w-full text-center align-middle">
+            다음 페이지로 자동으로 이동합니다.
           </h1>
         </div>
-        <div className="flex w-full justify-center items-end">
+        <div className="flex w-full justify-center items-end mt-5">
           {isLoading ? (
             <button className=" w-40 h-10 md:h-14 bg-gray-900 border text-white text-lg font-bold">
               <span className="flex w-full h-full text-white text-base justify-center items-center">
