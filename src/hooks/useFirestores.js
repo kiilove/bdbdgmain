@@ -10,6 +10,7 @@ import {
   where,
   orderBy,
   limit,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import deepEqual from "deep-equal";
@@ -116,6 +117,7 @@ export function useFirestoreAddData(collectionName) {
       const docRef = await addDoc(collection(db, collectionName), newData);
       const addedData = { ...newData, id: docRef.id };
       setData(addedData);
+      return addedData;
     } catch (error) {
       setError(error);
     } finally {
@@ -123,27 +125,33 @@ export function useFirestoreAddData(collectionName) {
     }
   };
 
-  return [data, loading, error, addData];
+  return { data, loading, error, addData };
 }
 
 export function useFirestoreUpdateData(collectionName) {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const updateData = async (id, newData) => {
     try {
+      setLoading(true);
       const docRef = await updateDoc(doc(db, collectionName, id), newData);
       const updatedData = { ...newData, id: docRef.id };
       setData((prevState) =>
         prevState.map((item) => (item.id === id ? updatedData : item))
       );
+      setLoading(false);
       return updatedData;
     } catch (error) {
       console.error(error);
+      setError(error);
+      setLoading(false);
       return null;
     }
   };
 
-  return { data, updateData };
+  return { data, loading, error, updateData };
 }
 
 export function useFirestoreDeleteData(collectionName) {

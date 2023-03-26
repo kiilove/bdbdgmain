@@ -1,14 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useContext } from "react";
-import {
-  MdOutlineKeyboardArrowDown,
-  MdOutlineKeyboardArrowUp,
-} from "react-icons/md";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menus } from "../consts/MenuArray";
 import { SelectedMenuContext } from "../contexts/SelectedMenuContext";
 
-const Sidebar = () => {
+const Drawbar = ({ setOpen }) => {
   const navigate = useNavigate();
   const [menuVisible, setMenuVisible] = useState({
     menuIndex: 0,
@@ -32,10 +27,8 @@ const Sidebar = () => {
       }
     } else {
       setSelectedMenu(Menus[idx].title);
-      if (Menus[idx].link !== "/") {
-        // link 값이 "/"가 아닌 경우에만 페이지 전환
-        navigate(Menus[idx].link);
-      }
+      setOpen();
+      navigate(Menus[idx].link);
     }
   };
 
@@ -43,10 +36,8 @@ const Sidebar = () => {
     setSelectedMenu(
       `${Menus[parentIdx].title} - ${Menus[parentIdx].subMenu[subIdx].title}`
     );
-    if (Menus[parentIdx].subMenu[subIdx].link !== "/") {
-      // link 값이 "/"가 아닌 경우에만 페이지 전환
-      navigate(Menus[parentIdx].subMenu[subIdx].link);
-    }
+    setOpen();
+    navigate(Menus[parentIdx].subMenu[subIdx].link);
   };
 
   useEffect(() => {
@@ -62,20 +53,14 @@ const Sidebar = () => {
 
   return (
     <div
-      className="flex flex-col  rounded-lg w-96 p-10 gap-y-2"
-      style={{ backgroundColor: "rgba(16,26,66,0.7)" }}
+      className="flex flex-col w-full py-10 gap-y-2"
+      style={{ backgroundColor: "rgba(16,26,66,1)" }}
     >
-      <div className="flex w-full h-20">
-        <span className="text-gray-100 text-2xl font-bold">BDBDg협회</span>
-      </div>
       {Menus.map((menu, idx) => (
-        <div
-          key={menu.index}
-          className="flex flex-col font-bold text-sm md:text-base lg:text-xl"
-        >
+        <div key={menu.index} className="flex flex-col font-bold text-sm">
           <div
             className={`${
-              menuVisible.index === menu.index && "bg-blue-900 "
+              isSelected(menu.title) && "bg-blue-900 "
             } flex w-full h-10 justify-start items-center hover:bg-gray-600 hover:text-white  text-gray-300 rounded-lg md:px-1 lg:px-3`}
             onClick={() => handleMenuClick(idx)}
           >
@@ -85,26 +70,21 @@ const Sidebar = () => {
                   <span className="">{menu.title}</span>
                 </button>
               </div>
-              <div className="flex">
-                {/* {menu?.subMenu ? (
-                  menuVisible.index === idx && menuVisible.isHidden ? (
-                    <MdOutlineKeyboardArrowDown />
-                  ) : (
-                    <MdOutlineKeyboardArrowUp />
-                  )
-                ) : null} */}
-              </div>
+              <div className="flex"></div>
             </div>
           </div>
           {menuVisible.menuIndex === idx &&
             menuVisible.isHidden === false &&
             menu?.subMenu && (
-              <div className="flex flex-col text-gray-400 text-base">
+              <div className="flex flex-col text-gray-400 text-sm">
                 {menu.subMenu.map((submenu, sIdx) => (
                   <div className="flex w-full">
-                    <div className="flex" key={submenu.index}>
+                    <div className="flex w-full" key={submenu.index}>
                       <button
-                        className="py-2 px-10 hover:text-gray-200 w-full flex justify-start items-center"
+                        className={`${
+                          isSelected(menu.title, submenu.title) &&
+                          "bg-gray-700 "
+                        } py-2 px-5 hover:text-gray-200 w-full flex justify-start items-center`}
                         onClick={() => handleSubMenuClick(idx, sIdx)}
                       >
                         {submenu.title}
@@ -120,4 +100,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default Drawbar;
