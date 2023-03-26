@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
+import { useContext } from "react";
 import { useState } from "react";
 import { ThreeDots } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
+import { CurrentContestContext } from "../contexts/CurrentContestContext";
 import {
   useFirestoreAddData,
   useFirestoreUpdateData,
@@ -16,14 +18,14 @@ const StartPage = () => {
   const contestCategoryListHook = useFirestoreAddData("contest_category_list");
   const contestGradesListHook = useFirestoreAddData("contest_grades_list");
   const contestInvoicesListHook = useFirestoreAddData("contest_invoices_list");
-
+  const { setCurrentContest } = useContext(CurrentContestContext);
   const navigate = useNavigate();
 
   const handleStart = async () => {
     setIsLoading(true);
 
     try {
-      const addedContest = await contestHook.addData({});
+      const addedContest = await contestHook.addData({ isCompleted: false });
 
       const [
         contestNoticeData,
@@ -93,6 +95,28 @@ const StartPage = () => {
           contestGradesListId: contestGradesListData.id,
           contestInvoicesListId: contestInvoicesListData.id,
         });
+
+        setCurrentContest({
+          contestId: addedContest.id,
+          contestNoticeId: contestNoticeData.id,
+          contestJudgesListId: contestJudgesListData.id,
+          contestCategoryListId: contestCategoryListData.id,
+          contestGradesListId: contestGradesListData.id,
+          contestInvoicesListId: contestInvoicesListData.id,
+        });
+
+        // Save the contest data to local storage
+        localStorage.setItem(
+          "currentContest",
+          JSON.stringify({
+            contestId: addedContest.id,
+            contestNoticeId: contestNoticeData.id,
+            contestJudgesListId: contestJudgesListData.id,
+            contestCategoryListId: contestCategoryListData.id,
+            contestGradesListId: contestGradesListData.id,
+            contestInvoicesListId: contestInvoicesListData.id,
+          })
+        );
       } else {
         console.error(
           "One or more errors occurred while adding data to collections."

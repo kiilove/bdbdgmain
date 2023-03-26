@@ -1,11 +1,20 @@
 export const Menus = [
   {
     index: 0,
-    title: "새로운 대회 개설",
-    link: "/startcontest",
+    title: "홈",
+    link: "/",
   },
   {
     index: 1,
+    title: "대회 개설",
+    link: "/startcontest",
+    subMenu: [
+      { index: 0, title: "새로운 대회 개설", link: "/startcontest" },
+      { index: 1, title: "미완성목록", link: "/contestuncompleted" },
+    ],
+  },
+  {
+    index: 2,
     title: "대회 시작전 업무",
     link: "/",
     subMenu: [
@@ -17,7 +26,7 @@ export const Menus = [
     ],
   },
   {
-    index: 2,
+    index: 3,
     title: "대회 당일 업무",
     link: "/",
     subMenu: [
@@ -28,7 +37,7 @@ export const Menus = [
     ],
   },
   {
-    index: 3,
+    index: 4,
     title: "종료된 대회 업무",
     link: "/",
     subMenu: [

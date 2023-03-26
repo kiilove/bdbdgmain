@@ -11,7 +11,7 @@ import { SelectedMenuContext } from "../contexts/SelectedMenuContext";
 const Sidebar = () => {
   const navigate = useNavigate();
   const [menuVisible, setMenuVisible] = useState({
-    menuIndex: 0,
+    menuIndex: -1,
     isHidden: true,
   });
   const { selectedMenu, setSelectedMenu } = useContext(SelectedMenuContext);
@@ -32,10 +32,8 @@ const Sidebar = () => {
       }
     } else {
       setSelectedMenu(Menus[idx].title);
-      if (Menus[idx].link !== "/") {
-        // link 값이 "/"가 아닌 경우에만 페이지 전환
-        navigate(Menus[idx].link);
-      }
+
+      navigate(Menus[idx].link);
     }
   };
 
@@ -43,10 +41,8 @@ const Sidebar = () => {
     setSelectedMenu(
       `${Menus[parentIdx].title} - ${Menus[parentIdx].subMenu[subIdx].title}`
     );
-    if (Menus[parentIdx].subMenu[subIdx].link !== "/") {
-      // link 값이 "/"가 아닌 경우에만 페이지 전환
-      navigate(Menus[parentIdx].subMenu[subIdx].link);
-    }
+
+    navigate(Menus[parentIdx].subMenu[subIdx].link);
   };
 
   useEffect(() => {
