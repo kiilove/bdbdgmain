@@ -2,15 +2,15 @@ import dayjs from "dayjs";
 import React, { useEffect, useMemo } from "react";
 import { useState } from "react";
 import useFirebaseStorage from "../hooks/useFirebaseStorage";
-import { useFirestoreUpdateData } from "../hooks/useFirestores";
+import {
+  useFirestoreGetDocument,
+  useFirestoreUpdateData,
+} from "../hooks/useFirestores";
 import ConfirmationModal from "../messageboxs/ConfirmationModal";
 
-const ContestNotice = () => {
-  const [renderMode, setRenderMode] = useState("edit");
-  const [contestInfo, setContestInfo] = useState({
-    contestBasicFee: 0,
-    contestExtraFee: 0,
-  });
+const ContestNotice = ({ mode, propContestNoticeId }) => {
+  const [renderMode, setRenderMode] = useState(mode || "edit");
+  const [contestNotice, setContestNotice] = useState({});
   const [files, setFiles] = useState([]);
   const [posterTheme, setPosterTheme] = useState([]);
   const [posterTitle, setPosterTitle] = useState(undefined);
@@ -18,6 +18,13 @@ const ContestNotice = () => {
   const [isMessageOpen, setIsMessageOpen] = useState(false);
   const updateContestNotice = useFirestoreUpdateData("contest_notice");
   const [contestNoticeId, setContestNoticeId] = useState(undefined);
+
+  const {
+    data: noticeData,
+    loading: noticeLoading,
+    error: noticeError,
+    getDocument: noticeDocument,
+  } = useFirestoreGetDocument("contest_notice");
 
   const { progress, urls, errors, representativeImage } = useFirebaseStorage(
     files,
@@ -50,19 +57,19 @@ const ContestNotice = () => {
   const handleInputChange = (e) => {
     switch (e.target.name) {
       case "contestBasicFee":
-        setContestInfo((prev) => ({
+        setContestNotice((prev) => ({
           ...prev,
           [e.target.name]: parseInt(e.target.value.replace(/[^0-9]/g, "")),
         }));
         break;
       case "contestExtraFee":
-        setContestInfo((prev) => ({
+        setContestNotice((prev) => ({
           ...prev,
           [e.target.name]: parseInt(e.target.value.replace(/[^0-9]/g, "")),
         }));
         break;
       default:
-        setContestInfo((prev) => ({
+        setContestNotice((prev) => ({
           ...prev,
           [e.target.name]: e.target.value,
         }));
@@ -78,7 +85,7 @@ const ContestNotice = () => {
     try {
       const updatedData = await updateContestNotice.updateData(
         contestNoticeId,
-        { ...contestInfo }
+        { ...contestNotice }
       );
 
       if (updatedData) {
@@ -101,7 +108,7 @@ const ContestNotice = () => {
       setFiles([]);
       setPosterTitle(urls[0].compressedUrl);
       setPosterTheme([...urls[0].colorTheme]);
-      setContestInfo((prev) => ({
+      setContestNotice((prev) => ({
         ...prev,
         contestPosterTitle: urls[0].compressedUrl,
         contestPosterTheme: [...urls[0].colorTheme],
@@ -110,23 +117,46 @@ const ContestNotice = () => {
   }, [urls]);
 
   useEffect(() => {
-    const currentContest = JSON.parse(localStorage.getItem("currentContest"));
-    if (!currentContest) {
-      setMessage({
-        title: "오류",
-        body: "대회정보를 읽어오지 못했습니다.",
-        body2: "잘못된 진입일 수 있습니다.",
-        body3: "첫화면으로 돌아갑니다.",
-        isButton: true,
-        confirmButtonText: "확인",
-        cancelButtonText: "",
-      });
-      setIsMessageOpen(true);
-      return;
+    if (!propContestNoticeId) {
+      const currentContest = JSON.parse(localStorage.getItem("currentContest"));
+      if (!currentContest) {
+        setMessage({
+          title: "오류",
+          body: "대회정보를 읽어오지 못했습니다.",
+          body2: "잘못된 진입일 수 있습니다.",
+          isButton: true,
+          confirmButtonText: "확인",
+          cancelButtonText: "",
+        });
+        setIsMessageOpen(true);
+        return;
+      }
+      const id = currentContest.contestNoticeId;
+      console.log(id);
+      setContestNoticeId(id);
+      const fetchData = async () => {
+        await noticeDocument(id);
+      };
+      fetchData();
+    } else {
+      setContestNoticeId(propContestNoticeId);
+      const fetchData = async () => {
+        await noticeDocument(propContestNoticeId);
+      };
+      fetchData();
     }
-    const id = currentContest.contestNoticeId;
-    setContestNoticeId(id);
   }, []);
+
+  useEffect(() => {
+    if (noticeData) {
+      console.log(noticeData);
+      setContestNotice({ ...noticeData });
+    }
+  }, [noticeData]);
+
+  useEffect(() => {
+    console.log(contestNotice);
+  }, [contestNotice]);
 
   const handleSavedConfirm = async () => {
     setIsMessageOpen(false);
@@ -143,7 +173,7 @@ const ContestNotice = () => {
       name: "contestFullTitle",
       id: "contestFullTitle",
       required: true,
-      value: contestInfo.contestFullTitle,
+      value: contestNotice.contestFullTitle,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -165,9 +195,14 @@ const ContestNotice = () => {
       type: "text",
       name: "contestShortTitle",
       id: "contestShortTitle",
-      value: contestInfo.contestShortTitle,
+      value: contestNotice.contestShortTitle,
       disabled: renderMode === "edit" ? false : true,
-      label: <span className="ml-2">대회명 (단축이름)</span>,
+      label:
+        renderMode === "edit" ? (
+          <span className="ml-2">대회명 (단축이름)</span>
+        ) : (
+          <span className="ml-2 text-gray-500">대회명 (단축이름)</span>
+        ),
       tailClass:
         renderMode === "edit"
           ? "w-full h-10 rounded-lg px-4 outline-none text-gray-200"
@@ -180,7 +215,7 @@ const ContestNotice = () => {
       name: "contestCount",
       id: "contestCount",
       required: true,
-      value: contestInfo.contestCount,
+      value: contestNotice.contestCount,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -203,7 +238,7 @@ const ContestNotice = () => {
       name: "contestOrg",
       id: "contestOrg",
       required: true,
-      value: contestInfo.contestOrg,
+      value: contestNotice.contestOrg,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -226,7 +261,7 @@ const ContestNotice = () => {
       name: "contestPromoter",
       id: "contestPromoter",
       required: true,
-      value: contestInfo.contestPromoter,
+      value: contestNotice.contestPromoter,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -249,7 +284,7 @@ const ContestNotice = () => {
       name: "contestLocation",
       id: "contestLocation",
       required: true,
-      value: contestInfo.contestLocation,
+      value: contestNotice.contestLocation,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -271,13 +306,18 @@ const ContestNotice = () => {
       type: "text",
       name: "contestLocationAddress",
       id: "contestLocationAddress",
-      value: contestInfo.contestLocationAddress,
+      value: contestNotice.contestLocationAddress,
       disabled: renderMode === "edit" ? false : true,
-      label: <span className="ml-2">대회장 주소</span>,
+      label:
+        renderMode === "edit" ? (
+          <span className="ml-2">대회장주소</span>
+        ) : (
+          <span className="ml-2 text-gray-500">대회장주소</span>
+        ),
       tailClass:
         renderMode === "edit"
           ? "w-full h-10 rounded-lg px-4 outline-none text-gray-200"
-          : "w-full h-10 rounded-lg px-4 outline-none text-gray-200 bg-transparent",
+          : "w-full rounded-lg px-2 font-semibold outline-none text-gray-200 bg-transparent",
       inlineStyleBg: renderMode === "edit" ? "rgba(5, 11, 54, 0.7)" : null,
     },
     {
@@ -286,20 +326,21 @@ const ContestNotice = () => {
       name: "contestDate",
       id: "contestDate",
       required: true,
-      value: contestInfo.contestDate,
+      value: contestNotice.contestDate,
       disabled: renderMode === "edit" ? false : true,
-      label: (
-        <span className="ml-2">
-          개최일자
-          {renderMode === "edit" && (
+      label:
+        renderMode === "edit" ? (
+          <span className="ml-2">
+            개최일자
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
-          )}
-        </span>
-      ),
+          </span>
+        ) : (
+          <span className="ml-2 text-gray-500">개최일자</span>
+        ),
       tailClass:
         renderMode === "edit"
           ? "w-32 h-10 rounded-lg px-4 outline-none text-gray-200"
-          : "w-32 h-10 rounded-lg px-4 outline-none text-gray-200 bg-transparent",
+          : "w-32 rounded-lg px-2 font-semibold outline-none text-gray-200 bg-transparent",
       inlineStyleBg: renderMode === "edit" ? "rgba(5, 11, 54, 0.7)" : null,
     },
     {
@@ -308,29 +349,31 @@ const ContestNotice = () => {
       name: "contestBasicFee",
       id: "contestBasicFee",
       required: true,
-      value: numberWithCommas(contestInfo.contestBasicFee),
+      value: numberWithCommas(contestNotice.contestBasicFee),
       disabled: renderMode === "edit" ? false : true,
-      label: (
-        <span className="ml-2">
-          참가비
-          {renderMode === "edit" && (
+      label:
+        renderMode === "edit" ? (
+          <span className="ml-2">
+            참가비
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
-          )}
-        </span>
-      ),
+          </span>
+        ) : (
+          <span className="ml-2 text-gray-500">참가비</span>
+        ),
       tailClass:
         renderMode === "edit"
           ? "w-32 h-10 rounded-lg px-4 outline-none text-gray-200"
-          : "w-32 h-10 rounded-lg px-4 outline-none text-gray-200 bg-transparent",
+          : "w-32 rounded-lg px-2 font-semibold outline-none text-gray-200 bg-transparent",
       inlineStyleBg: renderMode === "edit" ? "rgba(5, 11, 54, 0.7)" : null,
       externalComponent: (
         <div className="hidden md:flex ml-2 h-10 w-full items-center gap-x-2">
           <button
             className="bg-sky-500 px-2 rounded-lg h-8 w-14"
             onClick={() =>
-              setContestInfo((prev) => ({
+              setContestNotice((prev) => ({
                 ...prev,
-                contestBasicFee: parseInt(contestInfo.contestBasicFee) + 100000,
+                contestBasicFee:
+                  parseInt(contestNotice.contestBasicFee) + 100000,
               }))
             }
           >
@@ -339,9 +382,10 @@ const ContestNotice = () => {
           <button
             className="bg-sky-500 px-2 rounded-lg h-8 w-14"
             onClick={() =>
-              setContestInfo((prev) => ({
+              setContestNotice((prev) => ({
                 ...prev,
-                contestBasicFee: parseInt(contestInfo.contestBasicFee) + 50000,
+                contestBasicFee:
+                  parseInt(contestNotice.contestBasicFee) + 50000,
               }))
             }
           >
@@ -350,9 +394,10 @@ const ContestNotice = () => {
           <button
             className="bg-sky-500 px-2 rounded-lg h-8 w-14"
             onClick={() =>
-              setContestInfo((prev) => ({
+              setContestNotice((prev) => ({
                 ...prev,
-                contestBasicFee: parseInt(contestInfo.contestBasicFee) + 10000,
+                contestBasicFee:
+                  parseInt(contestNotice.contestBasicFee) + 10000,
               }))
             }
           >
@@ -361,7 +406,7 @@ const ContestNotice = () => {
           <button
             className="bg-sky-500 px-2 rounded-lg h-8 w-16"
             onClick={() =>
-              setContestInfo((prev) => ({
+              setContestNotice((prev) => ({
                 ...prev,
                 contestBasicFee: 0,
               }))
@@ -379,20 +424,21 @@ const ContestNotice = () => {
       name: "contestExtraFee",
       id: "contestExtraFee",
       required: true,
-      value: numberWithCommas(contestInfo.contestExtraFee),
+      value: numberWithCommas(contestNotice.contestExtraFee),
       disabled: renderMode === "edit" ? false : true,
-      label: (
-        <span className="ml-2">
-          중복참가비
-          {renderMode === "edit" && (
+      label:
+        renderMode === "edit" ? (
+          <span className="ml-2">
+            중복참가비
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
-          )}
-        </span>
-      ),
+          </span>
+        ) : (
+          <span className="ml-2 text-gray-500">중복참가비</span>
+        ),
       tailClass:
         renderMode === "edit"
           ? "w-32 h-10 rounded-lg px-4 outline-none text-gray-200"
-          : "w-32 h-10 rounded-lg px-4 outline-none text-gray-200 bg-transparent",
+          : "w-32 rounded-lg px-4 font-semibold outline-none text-gray-200 bg-transparent",
       inlineStyleBg: renderMode === "edit" ? "rgba(5, 11, 54, 0.7)" : null,
       beforeExternalComponet:
         renderMode === "edit" ? (
@@ -404,7 +450,7 @@ const ContestNotice = () => {
               name="contestExtraType"
               id="contestExtraType"
               onChange={(e) =>
-                setContestInfo((prev) => ({
+                setContestNotice((prev) => ({
                   ...prev,
                   contestExtraType: e.target.value,
                 }))
@@ -417,29 +463,29 @@ const ContestNotice = () => {
               <option
                 className="text-black"
                 value="정액"
-                selected={contestInfo.contestExtraType === "정액"}
+                selected={contestNotice.contestExtraType === "정액"}
               >
                 정액
               </option>
               <option
                 className="text-black "
                 value="누적"
-                selected={contestInfo.contestExtraType === "누적"}
+                selected={contestNotice.contestExtraType === "누적"}
               >
                 누적
               </option>
               <option
                 className="text-black "
                 value="없음"
-                selected={contestInfo.contestExtraType === "없음"}
+                selected={contestNotice.contestExtraType === "없음"}
               >
                 없음
               </option>
             </select>
           </div>
         ) : (
-          <div className="flex w-16 h-10 px-4 text-white justify-start items-center text-sm">
-            {contestInfo.contestExtraType}
+          <div className="flex w-16 px-2 text-white font-semibold justify-start items-center text-sm">
+            {contestNotice.contestExtraType}
           </div>
         ),
 
@@ -448,9 +494,10 @@ const ContestNotice = () => {
           <button
             className="bg-sky-500 px-2 rounded-lg h-8 w-14"
             onClick={() =>
-              setContestInfo((prev) => ({
+              setContestNotice((prev) => ({
                 ...prev,
-                contestExtraFee: parseInt(contestInfo.contestExtraFee) + 100000,
+                contestExtraFee:
+                  parseInt(contestNotice.contestExtraFee) + 100000,
               }))
             }
           >
@@ -459,9 +506,10 @@ const ContestNotice = () => {
           <button
             className="bg-sky-500 px-2 rounded-lg h-8 w-14"
             onClick={() =>
-              setContestInfo((prev) => ({
+              setContestNotice((prev) => ({
                 ...prev,
-                contestExtraFee: parseInt(contestInfo.contestExtraFee) + 50000,
+                contestExtraFee:
+                  parseInt(contestNotice.contestExtraFee) + 50000,
               }))
             }
           >
@@ -470,9 +518,10 @@ const ContestNotice = () => {
           <button
             className="bg-sky-500 px-2 rounded-lg h-8 w-14"
             onClick={() =>
-              setContestInfo((prev) => ({
+              setContestNotice((prev) => ({
                 ...prev,
-                contestExtraFee: parseInt(contestInfo.contestExtraFee) + 10000,
+                contestExtraFee:
+                  parseInt(contestNotice.contestExtraFee) + 10000,
               }))
             }
           >
@@ -481,7 +530,7 @@ const ContestNotice = () => {
           <button
             className="bg-sky-500 px-2 rounded-lg h-8 w-16"
             onClick={() =>
-              setContestInfo((prev) => ({
+              setContestNotice((prev) => ({
                 ...prev,
                 contestExtraFee: 0,
               }))
@@ -495,7 +544,7 @@ const ContestNotice = () => {
   ];
 
   const inputRender = (
-    <div className="flex w-full flex-col md:gap-y-5 md:px-5 ">
+    <div className="flex w-full flex-col gap-y-0 md:gap-y-5 md:px-5 ">
       <ConfirmationModal
         isOpen={isMessageOpen}
         onConfirm={handleSavedConfirm}
@@ -503,8 +552,15 @@ const ContestNotice = () => {
         message={message}
       />
       <div className="flex flex-col md:flex-row">
-        <div className="flex w-full md:w-1/3 text-gray-300 font-semibold font-san h-10 items-center text-sm ml-2">
-          대회포스터
+        <div className="flex w-full md:w-1/3 text-gray-300 font-semibold font-san h-10 items-center text-sm">
+          {renderMode === "edit" ? (
+            <span className="ml-2">
+              대회포스터
+              <span className="text-red-600 text-lg ml-2 align-middle">*</span>
+            </span>
+          ) : (
+            <span className="ml-2 text-gray-500">대회포스터</span>
+          )}
         </div>
         <div className="flex w-full md:w-2/3">
           <label htmlFor="contestPoster">
@@ -518,7 +574,10 @@ const ContestNotice = () => {
             />
             {posterTitle !== undefined && (
               <div className="flex py-2">
-                <img src={posterTitle} className="w-20 rounded-lg" />
+                <img
+                  src={contestNotice.contestPosterTitle}
+                  className="w-20 rounded-lg"
+                />
               </div>
             )}
             {renderMode === "edit" && (
@@ -529,12 +588,55 @@ const ContestNotice = () => {
           </label>
         </div>
       </div>
+      <div className="flex flex-col md:flex-row">
+        <div className="flex w-full md:w-1/3 text-gray-300 font-semibold font-san items-center text-sm">
+          {renderMode === "edit" ? (
+            <span className="ml-2">
+              대회상태
+              <span className="text-red-600 text-lg ml-2 align-middle">*</span>
+            </span>
+          ) : (
+            <span className="ml-2 text-gray-500">대회상태</span>
+          )}
+        </div>
+        <div className="flex w-full md:w-2/3">
+          {renderMode === "edit" ? (
+            <div
+              className="w-36 h-10 mr-2 bg-transparent flex justify-start items-center px-2 rounded-lg"
+              style={{ backgroundColor: "rgba(5, 11, 54, 0.7) " }}
+            >
+              <select
+                name="contestStatus"
+                id="contestStatus"
+                onChange={(e) => handleInputChange(e)}
+                className="w-full h-full text-gray-200 bg-transparent outline-none"
+              >
+                <option value="접수중" className="text-black">
+                  접수중
+                </option>
+                <option value="접수마감" className="text-black">
+                  접수마감
+                </option>
+                <option value="대회종료" className="text-black">
+                  대회종료
+                </option>
+              </select>
+            </div>
+          ) : (
+            <div className="flex text-gray-200 mb-4 ">
+              <span className="ml-2 font-semibold">
+                {contestNotice.contestStatus}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
       {contest_inputs.map((input, idx) => (
         <div className="flex flex-col md:flex-row ">
-          <div className="flex w-full md:w-1/3 text-gray-300 font-semibold font-san h-10 items-center text-sm ">
+          <div className="flex w-full md:w-1/3 text-gray-300 font-semibold font-san items-center text-sm ">
             {input.label}
           </div>
-          <div className="flex w-full md:w-2/3 gap-x-2">
+          <div className="flex w-full md:w-2/3 gap-x-2 mb-4">
             {input.beforeExternalComponet && input.beforeExternalComponet}
             {input.name === "contestDate" ? (
               <input
@@ -548,8 +650,8 @@ const ContestNotice = () => {
                 className={input.tailClass}
                 style={{ backgroundColor: input.inlineStyleBg }}
                 onBlur={(e) =>
-                  setContestInfo({
-                    ...contestInfo,
+                  setContestNotice({
+                    ...contestNotice,
                     contestDate: parseDate(e.target.value),
                   })
                 }
@@ -586,7 +688,7 @@ const ContestNotice = () => {
       >
         <div className="flex justify-between items-center h-16 px-5">
           <span className="text-white p-5 font-semibold md:text-lg">
-            대회공고작성
+            {renderMode === "edit" ? "대회공고작성" : "대회공고"}
           </span>
           {renderMode !== "edit" && (
             <button

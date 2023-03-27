@@ -3,6 +3,8 @@ import "./App.css";
 import { CurrentContestProvider } from "./contexts/CurrentContestContext";
 import { SelectedMenuProvider } from "./contexts/SelectedMenuContext";
 import ContestNotice from "./pages/ContestNotice";
+import ContestsList from "./pages/ContestsList";
+import ContestView from "./pages/ContestView";
 import Home from "./pages/Home";
 import StartPage from "./pages/StartPage";
 
@@ -18,8 +20,16 @@ function App() {
               element={<Home children={<StartPage />} />}
             />{" "}
             <Route
+              path="/contestlistpre"
+              element={<Home children={<ContestsList group={"pre"} />} />}
+            />
+            <Route
               path="/contestnotice"
               element={<Home children={<ContestNotice />} />}
+            />
+            <Route
+              path="/contestview/:contestId"
+              element={<Home children={<ContestView />} />}
             />
           </Routes>
         </BrowserRouter>

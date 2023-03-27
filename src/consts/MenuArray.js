@@ -18,7 +18,7 @@ export const Menus = [
     title: "대회 시작전 업무",
     link: "/",
     subMenu: [
-      { index: 0, title: "대회공고", link: "/" },
+      { index: 0, title: "대회공고", link: "/contestlistpre" },
       { index: 1, title: "참가신청서", link: "/" },
       { index: 2, title: "종목/체급관리", link: "/" },
       { index: 3, title: "심판배정", link: "/" },

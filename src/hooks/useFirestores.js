@@ -17,17 +17,23 @@ import deepEqual from "deep-equal";
 
 export function useFirestoreQuery(
   collectionName,
-  conditions = [],
-  orderByField = "",
-  orderByDirection = "asc",
-  limitNumber = 0
+  conditions = [], // 배열로 기본값을 설정
+  orderByField = "", // 빈 문자열로 기본값을 설정
+  orderByDirection = "asc", // 기본값을 'asc'로 설정
+  limitNumber = 0 // 0으로 기본값을 설정
 ) {
-  let q = query(
-    collection(db, collectionName),
-    ...conditions,
-    orderBy(orderByField, orderByDirection),
-    limit(limitNumber)
-  );
+  let q = collection(db, collectionName);
+  if (conditions.length > 0) {
+    conditions.forEach((condition) => {
+      q = query(q, condition);
+    });
+  }
+  if (orderByField) {
+    q = query(q, orderBy(orderByField, orderByDirection));
+  }
+  if (limitNumber) {
+    q = query(q, limit(limitNumber));
+  }
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,7 +92,8 @@ export function useFirestoreGetDocument(collectionName) {
       setLoading(true);
       const docSnapshot = await getDoc(doc(db, collectionName, collectionId));
       if (docSnapshot.exists()) {
-        setData([{ id: docSnapshot.id, ...docSnapshot.data() }]);
+        const getData = { id: docSnapshot.id, ...docSnapshot.data() };
+        setData({ id: docSnapshot.id, ...docSnapshot.data() });
       } else {
         setError({ message: "Document does not exist" });
         setData([]);

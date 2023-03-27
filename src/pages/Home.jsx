@@ -15,7 +15,7 @@ const Home = ({ children }) => {
     setIsOpenDrawer((prev) => !prev);
   };
   return (
-    <div className="flex min-w-screen min-h-screen justify-start flex-col md:flex-row md:justify-center p-0 md:p-10  bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900">
+    <div className="flex min-w-screen min-h-screen justify-start flex-col md:flex-row md:justify-center p-0 md:p-20  bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900">
       <div className="flex text-white w-full justify-start items-center h-14 px-1 md:hidden">
         <div className="flex w-10">
           <button
