@@ -133,15 +133,19 @@ export function useFirestoreUpdateData(collectionName) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const updateData = async (id, newData) => {
+  const updateData = async (id, newData, callback) => {
+    console.log(id);
     try {
       setLoading(true);
       const docRef = await updateDoc(doc(db, collectionName, id), newData);
-      const updatedData = { ...newData, id: docRef.id };
+
+      const updatedData = { ...newData };
       setData((prevState) =>
         prevState.map((item) => (item.id === id ? updatedData : item))
       );
+
       setLoading(false);
+      callback && callback();
       return updatedData;
     } catch (error) {
       console.error(error);

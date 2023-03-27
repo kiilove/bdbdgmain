@@ -102,33 +102,48 @@ const useFirebaseStorage = (files, storagePath) => {
               ]);
               resolve(null);
             },
-            () => {
-              getDownloadURL(uploadRef).then((downloadURL) => {
-                const originalUrl = shouldCompress
-                  ? uploadMetadata.customMetadata.url
-                  : downloadURL;
-                const compressedUrl = shouldCompress
-                  ? downloadURL
-                  : originalUrl;
+            async () => {
+              const downloadURL = await getDownloadURL(uploadRef);
+              const originalUrl = shouldCompress
+                ? uploadMetadata.customMetadata.url
+                : downloadURL;
+              const compressedUrl = shouldCompress ? downloadURL : originalUrl;
 
-                // 이미지 메타데이터 업데이트
-                updateMetadata(uploadRef, { customMetadata });
+              const customMetadata = {
+                name: compressedFile.name,
+                contentDisposition: `attachment; filename="${compressedFile.name}"`,
+                colorTheme: [
+                  `rgb(${colorPalette[0].join(",")})`,
+                  `rgb(${colorPalette[1].join(",")})`,
+                  `rgb(${colorPalette[2].join(",")})`,
+                  `rgb(${colorPalette[3].join(",")})`,
+                  `rgb(${colorPalette[4].join(",")})`,
+                ],
+              };
 
-                setUrls((prevUrls) => [
-                  ...prevUrls,
-                  { url: originalUrl, compressedUrl, ...customMetadata },
-                ]);
+              // 이미지 메타데이터 업데이트
+              try {
+                await updateMetadata(uploadRef, { customMetadata });
+              } catch (error) {
+                console.error(error);
+              }
 
-                const image = {
-                  url: originalUrl,
-                  compressedUrl,
-                  ...customMetadata,
-                };
-                if (index === 0) {
-                  setRepresentativeImage(image);
-                }
-                resolve(image);
-              });
+              setUrls((prevUrls) => [
+                ...prevUrls,
+                { url: originalUrl, compressedUrl, ...customMetadata },
+              ]);
+
+              const image = {
+                url: originalUrl,
+                compressedUrl,
+                ...customMetadata,
+              };
+
+              if (index === 0) {
+                setRepresentativeImage(image);
+              }
+
+              resolve(image);
             }
           );
         }).then((image) => {

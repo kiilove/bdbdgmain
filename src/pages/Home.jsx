@@ -15,7 +15,7 @@ const Home = ({ children }) => {
     setIsOpenDrawer((prev) => !prev);
   };
   return (
-    <div className="flex w-full h-screen justify-start flex-col md:flex-row md:justify-center p-0 md:p-10  bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900">
+    <div className="flex min-w-screen min-h-screen justify-start flex-col md:flex-row md:justify-center p-0 md:p-10  bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900">
       <div className="flex text-white w-full justify-start items-center h-14 px-1 md:hidden">
         <div className="flex w-10">
           <button
@@ -47,10 +47,8 @@ const Home = ({ children }) => {
         <Sidebar />
       </div>
       <div className="flex w-full justify-start items-start flex-col p-3 md:px-10 md:py-3">
-        <div className="flex w-full">
-          <span className="text-sm text-gray-300 md:text-base">
-            {selectedMenu}
-          </span>
+        <div className="flex w-full h-10 ml-2">
+          <span className="text-sm text-gray-300">{selectedMenu}</span>
         </div>
         <div className="flex w-full">{children}</div>
       </div>
