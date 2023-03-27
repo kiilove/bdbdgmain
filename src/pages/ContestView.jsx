@@ -59,20 +59,20 @@ const ContestView = () => {
         className="flex w-full h-full rounded-lg flex-col"
         style={{ backgroundColor: "rgba(11,17,66,0.7)" }}
       >
-        <div className="flex h-full w-full px-5 flex-col">
+        <div className="flex h-full w-full px-2 md:px-5 flex-col">
           <span className="text-white p-5 font-semibold md:text-lg">
             대회요약
           </span>
           {isLoading && <Loading />}
           {getNoticeData && (
             <div className="flex flex-col md:flex-row  gap-y-2 md:gap-y-0">
-              <div className="flex w-full px-5 md:w-1/5 lg:1/6">
+              <div className="flex w-full px-2 md:px-5 md:w-1/5 lg:1/6">
                 <img
                   src={getNoticeData.contestPosterTitle}
                   className="w-44 h-40 md:w-60 object-cover object-top rounded-lg"
                 />
               </div>
-              <div className="flex w-full flex-col px-5 md:px-0 gap-y-2 md:w-2/5 lg:w-3/6">
+              <div className="flex w-full flex-col px-2 md:px-5 gap-y-2 md:w-2/5 lg:w-3/6">
                 <div className="flex items-start text-gray-200">
                   <span className="font-san font-semibold text-sm md:text-lg">
                     {getNoticeData.contestFullTitle}

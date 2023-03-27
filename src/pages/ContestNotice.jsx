@@ -686,13 +686,13 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
         className="flex w-full h-full rounded-lg flex-col"
         style={{ backgroundColor: "rgba(11,17,66,0.7)" }}
       >
-        <div className="flex justify-between items-center h-16 px-5">
+        <div className="flex justify-between items-center h-16 px-2 md:px-5">
           <span className="text-white p-5 font-semibold md:text-lg">
             {renderMode === "edit" ? "대회공고작성" : "대회공고"}
           </span>
           {renderMode !== "edit" && (
             <button
-              className="bg-gray-200 px-4 h-10 rounded-lg"
+              className="bg-gray-200 px-4 h-10 rounded-lg mr-2"
               onClick={() => setRenderMode("edit")}
             >
               <span className="text-gray-900 font-semibold">수정</span>
