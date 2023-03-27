@@ -199,7 +199,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">대회명 (단축이름)</span>
+          <span className="ml-2 mb-2">대회명 (단축이름)</span>
         ) : (
           <span className="ml-2 text-gray-500">대회명 (단축이름)</span>
         ),
@@ -310,7 +310,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">대회장주소</span>
+          <span className="ml-2 mb-2">대회장주소</span>
         ) : (
           <span className="ml-2 text-gray-500">대회장주소</span>
         ),
@@ -581,7 +581,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
               </div>
             )}
             {renderMode === "edit" && (
-              <div className="w-32 h-8 rounded-lg px-2 bg-sky-500 text-white font-semibold text-sm flex justify-center items-center cursor-pointer">
+              <div className="w-32 h-8 mb-4 rounded-lg px-2 bg-sky-500 text-white font-semibold text-sm flex justify-center items-center cursor-pointer">
                 포스터올리기
               </div>
             )}
@@ -602,7 +602,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
         <div className="flex w-full md:w-2/3">
           {renderMode === "edit" ? (
             <div
-              className="w-36 h-10 mr-2 bg-transparent flex justify-start items-center px-2 rounded-lg"
+              className="w-36 h-10 mr-2 mb-4 bg-transparent flex justify-start items-center px-2 rounded-lg"
               style={{ backgroundColor: "rgba(5, 11, 54, 0.7) " }}
             >
               <select
