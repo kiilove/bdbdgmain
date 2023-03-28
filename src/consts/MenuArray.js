@@ -47,4 +47,14 @@ export const Menus = [
       { index: 3, title: "집계 출력", link: "/" },
     ],
   },
+  {
+    index: 5,
+    title: "관리자메뉴",
+    link: "/",
+    subMenu: [
+      { index: 0, title: "종목/체급등록", link: "/categoryonlyadmin" },
+      { index: 1, title: "협회등록", link: "/" },
+      { index: 2, title: "심판등록", link: "/" },
+    ],
+  },
 ];

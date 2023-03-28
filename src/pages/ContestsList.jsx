@@ -22,7 +22,7 @@ const ContestsList = ({ group }) => {
 
   const noticeCard = (contestId, contestNoticeId, imgSrc, title, status) => (
     <div
-      className="flex w-56 h-64 flex-col shadow border-2 border-transparent hover:cursor-pointer hover:border-gray-200 rounded-lg"
+      className="flex w-56 h-full flex-col shadow border-2 border-transparent hover:cursor-pointer hover:border-gray-200 rounded-lg"
       onClick={() => {
         handleRedirect(contestId, contestNoticeId);
       }}

@@ -6,6 +6,7 @@ import ContestNotice from "./pages/ContestNotice";
 import ContestsList from "./pages/ContestsList";
 import ContestView from "./pages/ContestView";
 import Home from "./pages/Home";
+import CategoryOnlyAdmin from "./pages/onlyadmin/CategoryOnlyAdmin";
 import StartPage from "./pages/StartPage";
 
 function App() {
@@ -26,6 +27,10 @@ function App() {
             <Route
               path="/contestnotice"
               element={<Home children={<ContestNotice />} />}
+            />
+            <Route
+              path="/categoryonlyadmin"
+              element={<Home children={<CategoryOnlyAdmin />} />}
             />
             <Route
               path="/contestview/:contestId"

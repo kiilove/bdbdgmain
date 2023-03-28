@@ -8,7 +8,7 @@ import {
 } from "../hooks/useFirestores";
 import ConfirmationModal from "../messageboxs/ConfirmationModal";
 
-const ContestNotice = ({ mode, propContestNoticeId }) => {
+const ContestNotice = ({ mode, propContestNoticeId, syncState }) => {
   const [renderMode, setRenderMode] = useState(mode || "edit");
   const [contestNotice, setContestNotice] = useState({});
   const [files, setFiles] = useState([]);
@@ -61,6 +61,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
           ...prev,
           [e.target.name]: parseInt(e.target.value.replace(/[^0-9]/g, "")),
         }));
+
         break;
       case "contestExtraFee":
         setContestNotice((prev) => ({
@@ -76,12 +77,29 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
     }
   };
 
+  const handleEditCancel = () => {
+    setContestNotice({ ...noticeData });
+    setRenderMode("read");
+  };
+
   const handleFileChange = (e) => {
     const selectedFiles = e.target.files;
     setFiles(selectedFiles);
   };
 
   const handleSaveContestNotice = async () => {
+    if (!contestNoticeId) {
+      setIsMessageOpen(true);
+
+      setMessage({
+        title: "업데이트",
+        body: "업데이트에 실패했습니다. 잠시후 다시 시도해주세요",
+        isButton: true,
+        confirmButtonText: "확인",
+        cancelButtonText: "",
+      });
+      return;
+    }
     try {
       const updatedData = await updateContestNotice.updateData(
         contestNoticeId,
@@ -101,6 +119,8 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       }
     } catch (error) {
       console.error(error.message);
+    } finally {
+      syncState(() => ({ ...contestNotice }));
     }
   };
   useMemo(() => {
@@ -117,8 +137,9 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
   }, [urls]);
 
   useEffect(() => {
-    if (!propContestNoticeId) {
+    if (propContestNoticeId === undefined) {
       const currentContest = JSON.parse(localStorage.getItem("currentContest"));
+
       if (!currentContest) {
         setMessage({
           title: "오류",
@@ -131,11 +152,10 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
         setIsMessageOpen(true);
         return;
       }
-      const id = currentContest.contestNoticeId;
-      console.log(id);
-      setContestNoticeId(id);
+
+      setContestNoticeId(currentContest.contestNoticeId);
       const fetchData = async () => {
-        await noticeDocument(id);
+        await noticeDocument(currentContest.contestNoticeId);
       };
       fetchData();
     } else {
@@ -149,14 +169,10 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
 
   useEffect(() => {
     if (noticeData) {
-      console.log(noticeData);
       setContestNotice({ ...noticeData });
+      setContestNoticeId(noticeData.id);
     }
   }, [noticeData]);
-
-  useEffect(() => {
-    console.log(contestNotice);
-  }, [contestNotice]);
 
   const handleSavedConfirm = async () => {
     setIsMessageOpen(false);
@@ -177,17 +193,19 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">
+          <span className="ml-2 h-10  flex items-center">
             대회명 (전체이름)
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
           </span>
         ) : (
-          <span className="ml-2 text-gray-500">대회명 (전체이름)</span>
+          <span className="ml-2 text-gray-500 h-full  flex items-center">
+            대회명 (전체이름)
+          </span>
         ),
       tailClass:
         renderMode === "edit"
           ? "w-full h-10 rounded-lg px-4 outline-none text-gray-200"
-          : "w-full rounded-lg px-2 font-semibold outline-none text-gray-200 bg-transparent",
+          : "w-full rounded-lg px-2 font-semibold outline-none text-gray-200 bg-transparent items-center",
       inlineStyleBg: renderMode === "edit" ? "rgba(5, 11, 54, 0.7)" : null,
     },
     {
@@ -199,14 +217,18 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2 mb-2">대회명 (단축이름)</span>
+          <span className="ml-2 h-10  flex items-center">
+            대회명 (단축이름)
+          </span>
         ) : (
-          <span className="ml-2 text-gray-500">대회명 (단축이름)</span>
+          <span className="ml-2 text-gray-500 h-full  flex items-center">
+            대회명 (단축이름)
+          </span>
         ),
       tailClass:
         renderMode === "edit"
           ? "w-full h-10 rounded-lg px-4 outline-none text-gray-200"
-          : "w-full rounded-lg px-2 font-semibold outline-none text-gray-200 bg-transparent",
+          : "w-full rounded-lg px-2 font-semibold outline-none text-gray-200 bg-transparent items-end",
       inlineStyleBg: renderMode === "edit" ? "rgba(5, 11, 54, 0.7)" : null,
     },
     {
@@ -219,12 +241,14 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">
+          <span className="ml-2 h-10  flex items-center">
             회차
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
           </span>
         ) : (
-          <span className="ml-2 text-gray-500">회차</span>
+          <span className="ml-2 text-gray-500 h-full  flex items-center">
+            회차
+          </span>
         ),
       tailClass:
         renderMode === "edit"
@@ -242,12 +266,14 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">
+          <span className="ml-2 h-10  flex items-center">
             주관
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
           </span>
         ) : (
-          <span className="ml-2 text-gray-500">주관</span>
+          <span className="ml-2 text-gray-500 h-full  flex items-center">
+            주관
+          </span>
         ),
       tailClass:
         renderMode === "edit"
@@ -265,12 +291,14 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">
+          <span className="ml-2 h-10 flex items-center">
             주최
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
           </span>
         ) : (
-          <span className="ml-2 text-gray-500">주최</span>
+          <span className="ml-2 text-gray-500 h-full flex items-center">
+            주최
+          </span>
         ),
       tailClass:
         renderMode === "edit"
@@ -288,12 +316,14 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">
+          <span className="ml-2 h-10 flex items-center">
             대회장소
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
           </span>
         ) : (
-          <span className="ml-2 text-gray-500">대회장소</span>
+          <span className="ml-2 text-gray-500 h-full flex items-center">
+            대회장소
+          </span>
         ),
       tailClass:
         renderMode === "edit"
@@ -310,9 +340,11 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2 mb-2">대회장주소</span>
+          <span className="ml-2 h-10 flex items-center">대회장주소</span>
         ) : (
-          <span className="ml-2 text-gray-500">대회장주소</span>
+          <span className="ml-2 text-gray-500 h-full flex items-center">
+            대회장주소
+          </span>
         ),
       tailClass:
         renderMode === "edit"
@@ -330,12 +362,14 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">
+          <span className="ml-2 h-10 flex items-center">
             개최일자
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
           </span>
         ) : (
-          <span className="ml-2 text-gray-500">개최일자</span>
+          <span className="ml-2 text-gray-500 h-full flex items-center">
+            개최일자
+          </span>
         ),
       tailClass:
         renderMode === "edit"
@@ -353,12 +387,14 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">
+          <span className="ml-2 h-10 flex items-center">
             참가비
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
           </span>
         ) : (
-          <span className="ml-2 text-gray-500">참가비</span>
+          <span className="ml-2 text-gray-500 h-full flex items-center">
+            참가비
+          </span>
         ),
       tailClass:
         renderMode === "edit"
@@ -428,17 +464,19 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
-          <span className="ml-2">
+          <span className="ml-2 h-10 flex items-center">
             중복참가비
             <span className="text-red-600 text-lg ml-2 align-middle">*</span>
           </span>
         ) : (
-          <span className="ml-2 text-gray-500">중복참가비</span>
+          <span className="ml-2 text-gray-500 h-full flex items-center">
+            중복참가비
+          </span>
         ),
       tailClass:
         renderMode === "edit"
           ? "w-32 h-10 rounded-lg px-4 outline-none text-gray-200"
-          : "w-32 rounded-lg px-4 font-semibold outline-none text-gray-200 bg-transparent",
+          : "w-32 rounded-lg px-4 font-semibold outline-none text-gray-200 bg-transparent ",
       inlineStyleBg: renderMode === "edit" ? "rgba(5, 11, 54, 0.7)" : null,
       beforeExternalComponet:
         renderMode === "edit" ? (
@@ -554,12 +592,14 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
       <div className="flex flex-col md:flex-row">
         <div className="flex w-full md:w-1/3 text-gray-300 font-semibold font-san h-10 items-center text-sm">
           {renderMode === "edit" ? (
-            <span className="ml-2">
+            <span className="ml-2 flex items-center">
               대회포스터
               <span className="text-red-600 text-lg ml-2 align-middle">*</span>
             </span>
           ) : (
-            <span className="ml-2 text-gray-500">대회포스터</span>
+            <span className="ml-2 text-gray-500 flex items-center">
+              대회포스터
+            </span>
           )}
         </div>
         <div className="flex w-full md:w-2/3">
@@ -572,8 +612,8 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
               disabled={renderMode === "edit" ? false : true}
               onChange={handleFileChange}
             />
-            {posterTitle !== undefined && (
-              <div className="flex py-2">
+            {contestNotice.contestPosterTitle !== undefined && (
+              <div className="flex ml-2 mb-2">
                 <img
                   src={contestNotice.contestPosterTitle}
                   className="w-20 rounded-lg"
@@ -581,7 +621,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
               </div>
             )}
             {renderMode === "edit" && (
-              <div className="w-32 h-8 mb-4 rounded-lg px-2 bg-sky-500 text-white font-semibold text-sm flex justify-center items-center cursor-pointer">
+              <div className="w-32 h-8 mb-4 md:mb-0 rounded-lg px-2 bg-sky-500 text-white font-semibold text-sm flex justify-center items-center cursor-pointer">
                 포스터올리기
               </div>
             )}
@@ -596,13 +636,13 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
               <span className="text-red-600 text-lg ml-2 align-middle">*</span>
             </span>
           ) : (
-            <span className="ml-2 text-gray-500">대회상태</span>
+            <span className="ml-2 text-gray-500 h-full">대회상태</span>
           )}
         </div>
         <div className="flex w-full md:w-2/3">
           {renderMode === "edit" ? (
             <div
-              className="w-36 h-10 mr-2 mb-4 bg-transparent flex justify-start items-center px-2 rounded-lg"
+              className="w-36 h-10 mr-2 mb-4 md:mb-0 bg-transparent flex justify-start items-center px-2 rounded-lg"
               style={{ backgroundColor: "rgba(5, 11, 54, 0.7) " }}
             >
               <select
@@ -623,7 +663,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
               </select>
             </div>
           ) : (
-            <div className="flex text-gray-200 mb-4 ">
+            <div className="flex text-gray-200 mb-4 items-center ">
               <span className="ml-2 font-semibold">
                 {contestNotice.contestStatus}
               </span>
@@ -632,7 +672,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
         </div>
       </div>
       {contest_inputs.map((input, idx) => (
-        <div className="flex flex-col md:flex-row ">
+        <div className="flex md:h-10 flex-col md:flex-row ">
           <div className="flex w-full md:w-1/3 text-gray-300 font-semibold font-san items-center text-sm ">
             {input.label}
           </div>
@@ -690,6 +730,7 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
           <span className="text-white p-5 font-semibold md:text-lg">
             {renderMode === "edit" ? "대회공고작성" : "대회공고"}
           </span>
+
           {renderMode !== "edit" && (
             <button
               className="bg-gray-200 px-4 h-10 rounded-lg mr-2"
@@ -722,6 +763,12 @@ const ContestNotice = ({ mode, propContestNoticeId }) => {
               ></div>
             </div>
             <div className="flex h-full w-full p-5 justify-end">
+              <button
+                className="bg-gray-200 px-4 h-10 rounded-lg mr-3"
+                onClick={() => handleEditCancel()}
+              >
+                <span className="text-gray-900 font-semibold">취소</span>
+              </button>
               <button
                 className="bg-gray-200 px-4 h-10 rounded-lg"
                 onClick={() => handleSaveContestNotice()}
