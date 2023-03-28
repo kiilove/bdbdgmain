@@ -1,16 +1,20 @@
 import React from "react";
 import { useRef } from "react";
+import { useContext } from "react";
+import { useEffect } from "react";
 import { useState } from "react";
-import { useFirestoreAddData } from "../../hooks/useFirestores";
+import { CategoryGradePairContext } from "../../contexts/CategoryGradePairContext";
+import {
+  useFirestoreAddData,
+  useFirestoreQuery,
+} from "../../hooks/useFirestores";
 import ConfirmationModal from "../../messageboxs/ConfirmationModal";
 
-const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
+const CategoryAdd = ({ mode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [renderMode, setRenderMode] = useState(mode || "edit");
-  const [categoryInfo, setCategoryInfo] = useState({
-    categoryGender: "m",
-    categoryLaunched: "운영",
-  });
+  const [categroyIndexLastNumber, setCategoryIndexLastNumber] = useState(0);
+  const [categoryInfo, setCategoryInfo] = useState({});
   const [gradeInfo, setGradeGradeInfo] = useState({
     gradeFilterType: "height",
   });
@@ -19,9 +23,19 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
   const [isMessageOpen, setIsMessageOpen] = useState(false);
   const { addData } = useFirestoreAddData("category_pool");
   const { addData: addGradeData } = useFirestoreAddData("grade_pool");
+  const {
+    data: categoryData,
+    loading: categoryLoading,
+    error: categoryError,
+  } = useFirestoreQuery("category_pool");
+
+  const { categoryGradePair, setCategoryGradePair } = useContext(
+    CategoryGradePairContext
+  );
 
   const initState = () => {
     setCategoryInfo({
+      categoryIndex: categroyIndexLastNumber + 2,
       categoryTitle: "",
       categoryGender: "m",
       categoryLaunched: "운영",
@@ -59,6 +73,20 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
     return addedGrades.map((grade) => grade.id);
   }
   const handleSaveCategoryWithGrades = async () => {
+    if (
+      categoryInfo.categoryTitle === "" ||
+      categoryInfo.categoryTitle === undefined
+    ) {
+      setIsMessageOpen(true);
+      setMessage({
+        title: "오류",
+        body: "종목명은 반드시 입력해야합니다.",
+        isButton: true,
+        confirmButtonText: "확인",
+        cancelButtonText: "",
+      });
+      return;
+    }
     try {
       const addedGradeIds = await addCategory(categoryInfo, gradeArray);
       console.log("Added grade IDs:", addedGradeIds);
@@ -93,7 +121,7 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       name: "categoryIndex",
       id: "categoryIndex",
       required: true,
-      value: categoryInfo.categoryIndex,
+      value: categoryInfo?.categoryIndex,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -118,7 +146,7 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       name: "categoryTitle",
       id: "categoryTitle",
       required: true,
-      value: categoryInfo.categoryTitle,
+      value: categoryInfo?.categoryTitle,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -143,7 +171,7 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       name: "categoryGender",
       id: "categoryGender",
       required: true,
-      value: categoryInfo.categoryGender,
+      value: categoryInfo?.categoryGender,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -166,18 +194,21 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
           id: "categoryGender1",
           name: "categoryGender1",
           value: "m",
+          selected: categoryInfo?.categoryGender === "m",
           text: "남자",
         },
         {
           id: "categoryGender2",
           name: "categoryGender2",
           value: "f",
+          selected: categoryInfo?.categoryGender === "f",
           text: "여자",
         },
         {
           id: "categoryGender3",
           name: "categoryGender3",
           value: "all",
+          selected: categoryInfo?.categoryGender === "all",
           text: "전부",
         },
       ],
@@ -187,7 +218,7 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       type: "select",
       name: "categoryLaunched",
       id: "categoryLaunched",
-      value: categoryInfo.categoryLaunched,
+      value: categoryInfo?.categoryLaunched,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -210,12 +241,14 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
           id: "categoryLaunched1",
           name: "categoryLaunched1",
           value: "운영",
+          selected: categoryInfo?.categoryLaunched === "운영",
           text: "운영",
         },
         {
           id: "categoryLaunched2",
           name: "categoryLaunched2",
           value: "미운영",
+          selected: categoryInfo?.categoryLaunched === "미운영",
           text: "미운영",
         },
       ],
@@ -228,7 +261,7 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       name: "gradeTitle",
       id: "gradeTitle",
       required: true,
-      value: categoryInfo.gradeTitle,
+      value: gradeInfo?.gradeTitle,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -253,7 +286,7 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       name: "gradeFilterType",
       id: "gradeFilterType",
 
-      value: categoryInfo.gradeFilterType,
+      value: gradeInfo?.gradeFilterType,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -304,7 +337,7 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       name: "gradeMinValue",
       id: "gradeMinValue",
       required: true,
-      value: categoryInfo.gradeIndex,
+      value: gradeInfo?.gradeMinValue,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -329,7 +362,7 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       name: "gradeMaxValue",
       id: "gradeMaxValue",
       required: true,
-      value: categoryInfo.gradeIndex,
+      value: gradeInfo?.gradeMaxValue,
       disabled: renderMode === "edit" ? false : true,
       label:
         renderMode === "edit" ? (
@@ -393,7 +426,20 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
   };
 
   const handleAddGrade = () => {
-    setGradeArray([...gradeArray, gradeInfo]);
+    if (gradeInfo.gradeTitle === "" || gradeInfo.gradeTitle === undefined) {
+      setIsMessageOpen(true);
+      setMessage({
+        title: "오류",
+        body: "체급명은 반드시 입력해야합니다.",
+        isButton: true,
+        confirmButtonText: "확인",
+        cancelButtonText: "",
+      });
+      return;
+    }
+
+    const gradeIndex = gradeArray?.length ? gradeArray.length + 1 : 1;
+    setGradeArray([...gradeArray, { ...gradeInfo, gradeIndex }]);
     console.log(gradeArray);
   };
   const categoryInputRender = (
@@ -467,7 +513,9 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
                   onChange={(e) => handleInputChange(e)}
                 >
                   {input.options.map((option) => (
-                    <option value={option.value}>{option.text}</option>
+                    <option value={option.value} selected={option.selected}>
+                      {option.text}
+                    </option>
                   ))}
                 </select>
               )}
@@ -500,6 +548,20 @@ const CategoryAdd = ({ mode, propCategoryId, syncState }) => {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    if (categoryGradePair <= categroyIndexLastNumber) {
+      setCategoryIndexLastNumber(categroyIndexLastNumber + 1);
+    } else {
+      setCategoryIndexLastNumber(categoryGradePair.length + 1);
+    }
+
+    setCategoryInfo(initState);
+  }, [categoryGradePair]);
+
+  useEffect(() => {
+    console.log(gradeArray);
+  }, [gradeArray]);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-5 mt-5">

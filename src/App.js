@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
+import { CategoryGradePairProvider } from "./contexts/CategoryGradePairContext";
 import { CurrentContestProvider } from "./contexts/CurrentContestContext";
 import { SelectedMenuProvider } from "./contexts/SelectedMenuContext";
 import ContestNotice from "./pages/ContestNotice";
@@ -30,7 +31,15 @@ function App() {
             />
             <Route
               path="/categoryonlyadmin"
-              element={<Home children={<CategoryOnlyAdmin />} />}
+              element={
+                <Home
+                  children={
+                    <CategoryGradePairProvider>
+                      <CategoryOnlyAdmin />
+                    </CategoryGradePairProvider>
+                  }
+                />
+              }
             />
             <Route
               path="/contestview/:contestId"

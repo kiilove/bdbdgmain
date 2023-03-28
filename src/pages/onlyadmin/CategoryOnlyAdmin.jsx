@@ -1,21 +1,55 @@
 import React from "react";
+import { useEffect } from "react";
 import { useRef } from "react";
+import { useContext } from "react";
 import { useState } from "react";
+import { CategoryGradePairContext } from "../../contexts/CategoryGradePairContext";
+import { useFirestoreQuery } from "../../hooks/useFirestores";
 import CategoryAdd from "../basedata/CategoryAdd";
 import CategoryList from "../basedata/CategoryList";
 import Loading from "../Loading";
 
 const CategoryOnlyAdmin = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [getCategorys, setGetCategorys] = useState([]);
+  const [dataPair, setDataPair] = useState([]);
   const [selectedTab, setSelectedTab] = useState({
     id: "전체목록",
     text: "전체목록",
-    component: <CategoryList />,
   });
+
+  const { categoryGradePair, setCategoryGradePair } = useContext(
+    CategoryGradePairContext
+  );
+
+  const {
+    data: categoryData,
+    loading: categoryLoading,
+    error: categoryError,
+  } = useFirestoreQuery("category_pool");
+
+  const {
+    data: gradeData,
+    loading: gradeLoading,
+    error: gradeError,
+  } = useFirestoreQuery("grade_pool");
+
   const tabs = [
-    { id: "전체목록", text: "전체목록", component: <CategoryList /> },
+    {
+      id: "전체목록",
+      text: "전체목록",
+      component: (
+        <CategoryList propDataPair={dataPair} syncState={setDataPair} />
+      ),
+    },
     { id: "종목내용", text: "종목내용" },
-    { id: "종목추가", text: "종목추가", component: <CategoryAdd /> },
+    {
+      id: "종목추가",
+      text: "종목추가",
+      component: (
+        <CategoryAdd propDataPair={dataPair} syncState={setDataPair} />
+      ),
+    },
   ];
 
   const refs = useRef(
@@ -24,6 +58,25 @@ const CategoryOnlyAdmin = () => {
       return acc;
     }, {})
   );
+
+  useEffect(() => {
+    if (categoryData.length > 0 && gradeData.length > 0) {
+      const newDataPair = categoryData.map((category) => {
+        const matchedGrades = gradeData.filter(
+          (grade) => grade.refCategoryId === category.id
+        );
+        return { category, matchedGrades };
+      });
+      setDataPair(newDataPair);
+    }
+  }, [categoryData, gradeData]);
+
+  useEffect(() => {
+    if (dataPair.length) {
+      setCategoryGradePair([...dataPair]);
+      setIsLoading(false);
+    }
+  }, [dataPair]);
 
   function handleTabClick(tab) {
     setSelectedTab(tab);
@@ -38,7 +91,7 @@ const CategoryOnlyAdmin = () => {
           <span className="text-white p-5 font-semibold md:text-lg">
             종목/체급
           </span>
-          {/* {isLoading && <Loading />} */}
+          {isLoading && <Loading />}
 
           <div className="flex w-full h-full mt-2 md:gap-x-2 items-end">
             {tabs.map((tab) => (
@@ -63,7 +116,14 @@ const CategoryOnlyAdmin = () => {
           </div>
         </div>
       </div>
-      {<div className="flex w-full">{selectedTab.component}</div>}
+      {
+        <div className="flex w-full">
+          {selectedTab.id === "전체목록" && dataPair.length > 0 && (
+            <CategoryList />
+          )}
+          {selectedTab.id === "종목추가" && <CategoryAdd mode={"edit"} />}
+        </div>
+      }
     </div>
   );
 };
