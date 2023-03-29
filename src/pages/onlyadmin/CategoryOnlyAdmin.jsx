@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { useContext } from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { CategoryGradePairContext } from "../../contexts/CategoryGradePairContext";
 import { useFirestoreQuery } from "../../hooks/useFirestores";
 import CategoryAdd from "../basedata/CategoryAdd";
@@ -13,6 +14,7 @@ const CategoryOnlyAdmin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [getCategorys, setGetCategorys] = useState([]);
   const [dataPair, setDataPair] = useState([]);
+
   const [selectedTab, setSelectedTab] = useState({
     id: "전체목록",
     text: "전체목록",
@@ -33,22 +35,16 @@ const CategoryOnlyAdmin = () => {
     loading: gradeLoading,
     error: gradeError,
   } = useFirestoreQuery("grade_pool");
-
+  const navigate = useNavigate();
   const tabs = [
     {
       id: "전체목록",
       text: "전체목록",
-      component: (
-        <CategoryList propDataPair={dataPair} syncState={setDataPair} />
-      ),
     },
-    { id: "종목내용", text: "종목내용" },
+
     {
       id: "종목추가",
       text: "종목추가",
-      component: (
-        <CategoryAdd propDataPair={dataPair} syncState={setDataPair} />
-      ),
     },
   ];
 
@@ -61,7 +57,10 @@ const CategoryOnlyAdmin = () => {
 
   useEffect(() => {
     if (categoryData.length > 0 && gradeData.length > 0) {
-      const newDataPair = categoryData.map((category) => {
+      const sortedCategoryData = [...categoryData].sort(
+        (a, b) => a.categoryIndex - b.categoryIndex
+      );
+      const newDataPair = sortedCategoryData.map((category) => {
         const matchedGrades = gradeData.filter(
           (grade) => grade.refCategoryId === category.id
         );
@@ -81,6 +80,8 @@ const CategoryOnlyAdmin = () => {
   function handleTabClick(tab) {
     setSelectedTab(tab);
   }
+
+  const handleCategoryEdit = (index) => {};
   return (
     <div className="flex w-full flex-col mt-5">
       <div
@@ -119,9 +120,21 @@ const CategoryOnlyAdmin = () => {
       {
         <div className="flex w-full">
           {selectedTab.id === "전체목록" && dataPair.length > 0 && (
-            <CategoryList />
+            <CategoryList setSelectedTab={setSelectedTab} />
           )}
-          {selectedTab.id === "종목추가" && <CategoryAdd mode={"edit"} />}
+          {selectedTab.id === "종목보기" && dataPair.length > 0 && (
+            <CategoryAdd
+              mode={"read"}
+              categoryIndex={selectedTab.categoryIndex}
+            />
+          )}
+          {selectedTab.id === "종목수정" && dataPair.length > 0 && (
+            <CategoryAdd
+              mode={"edit"}
+              categoryIndex={selectedTab.categoryIndex}
+            />
+          )}
+          {selectedTab.id === "종목추가" && <CategoryAdd mode={"add"} />}
         </div>
       }
     </div>
