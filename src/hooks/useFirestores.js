@@ -22,63 +22,45 @@ export function useFirestoreQuery(
   orderByDirection = "asc", // 기본값을 'asc'로 설정
   limitNumber = 0 // 0으로 기본값을 설정
 ) {
-  let q = collection(db, collectionName);
-  if (conditions.length > 0) {
-    conditions.forEach((condition) => {
-      q = query(q, condition);
-    });
-  }
-  if (orderByField) {
-    q = query(q, orderBy(orderByField, orderByDirection));
-  }
-  if (limitNumber) {
-    q = query(q, limit(limitNumber));
-  }
-
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const querySnapshot = await getDocs(q);
-        const documents = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        if (isMounted) {
-          setData((prevState) => {
-            const shouldUpdate =
-              prevState.length !== documents.length ||
-              prevState.some(
-                (prevItem, index) => !deepEqual(prevItem, documents[index])
-              );
-            return shouldUpdate ? documents : prevState;
-          });
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error(error);
-        if (isMounted) {
-          setError(error);
-          setLoading(false);
-        }
-      }
+  async function getDocuments() {
+    let q = collection(db, collectionName);
+    if (conditions.length > 0) {
+      conditions.forEach((condition) => {
+        q = query(q, condition);
+      });
     }
-    fetchData();
-    return () => {
-      isMounted = false;
-    };
-  }, [q]);
+    if (orderByField) {
+      q = query(q, orderBy(orderByField, orderByDirection));
+    }
+    if (limitNumber) {
+      q = query(q, limit(limitNumber));
+    }
+
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(q);
+      const documents = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setData(documents);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setError(error);
+      setLoading(false);
+    }
+  }
 
   return {
     data,
     loading,
     error,
+    getDocuments,
   };
 }
 
@@ -144,13 +126,9 @@ export function useFirestoreUpdateData(collectionName) {
     console.log(id);
     try {
       setLoading(true);
-      const docRef = await updateDoc(doc(db, collectionName, id), newData);
-
+      await updateDoc(doc(db, collectionName, id), newData);
       const updatedData = { ...newData };
-      setData((prevState) =>
-        prevState.map((item) => (item.id === id ? updatedData : item))
-      );
-
+      setData(updatedData);
       setLoading(false);
       callback && callback();
       return updatedData;
@@ -171,7 +149,7 @@ export function useFirestoreDeleteData(collectionName) {
   const deleteData = async (id) => {
     try {
       await deleteDoc(doc(db, collectionName, id));
-      setData((prevState) => prevState.filter((item) => item.id !== id));
+      setData(id);
       return true;
     } catch (error) {
       console.error(error);

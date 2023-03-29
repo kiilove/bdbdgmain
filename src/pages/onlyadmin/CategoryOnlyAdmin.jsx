@@ -28,12 +28,14 @@ const CategoryOnlyAdmin = () => {
     data: categoryData,
     loading: categoryLoading,
     error: categoryError,
+    getDocuments: categoryGetDocuments,
   } = useFirestoreQuery("category_pool");
 
   const {
     data: gradeData,
     loading: gradeLoading,
     error: gradeError,
+    getDocuments: gradeGetDocuments,
   } = useFirestoreQuery("grade_pool");
   const navigate = useNavigate();
   const tabs = [

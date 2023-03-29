@@ -6,6 +6,8 @@ import { useState } from "react";
 import { CategoryGradePairContext } from "../../contexts/CategoryGradePairContext";
 import {
   useFirestoreAddData,
+  useFirestoreUpdateData,
+  useFirestoreDeleteData,
   useFirestoreQuery,
 } from "../../hooks/useFirestores";
 import ConfirmationModal from "../../messageboxs/ConfirmationModal";
@@ -15,14 +17,16 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
   const [renderMode, setRenderMode] = useState(mode || "edit");
   const [categroyIndexLastNumber, setCategoryIndexLastNumber] = useState(0);
   const [categoryInfo, setCategoryInfo] = useState({});
-  const [gradeInfo, setGradeInfo] = useState({
-    gradeFilterType: "height",
-  });
+  const [gradeInfo, setGradeInfo] = useState({});
   const [gradeArray, setGradeArray] = useState([]);
   const [message, setMessage] = useState({});
   const [isMessageOpen, setIsMessageOpen] = useState(false);
-  const { addData } = useFirestoreAddData("category_pool");
   const { addData: addGradeData } = useFirestoreAddData("grade_pool");
+  const { updateData: updateGradeData } = useFirestoreUpdateData("grade_pool");
+  const { deleteData: delGradeData } = useFirestoreDeleteData("grade_pool");
+  const { addData } = useFirestoreAddData("category_pool");
+  const { updateData: categoryUpdateData } =
+    useFirestoreUpdateData("category_pool");
   const {
     data: categoryData,
     loading: categoryLoading,
@@ -38,18 +42,49 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
       setCategoryInfo({
         categoryIndex: handleIndexNumber(),
         categoryTitle: "",
-        categoryGender: "m",
+        categoryGender: "남자",
         categoryLaunched: "운영",
       });
       setGradeInfo({
         gradeTitle: "",
-        gradeFilterType: "height",
+        gradeFilterType: "",
         gradeMinValue: "",
         gradeMaxValue: "",
       });
       setGradeArray([]);
     }
   };
+
+  async function manageGradePool(original, modified) {
+    const idsToDelete = original
+      .filter(
+        (oldItem) => !modified.some((newItem) => newItem.id === oldItem.id)
+      )
+      .map((item) => item.id);
+    const updatedItems = [];
+
+    for (const item of modified) {
+      if (item.id) {
+        // item has an id, update the existing document
+        const updatedItem = await updateGradeData(item.id, item);
+        updatedItems.push(updatedItem);
+      } else {
+        // item doesn't have an id, add a new document
+        const addedItem = await addGradeData({
+          ...item,
+          refCategoryId: categoryInfo.id,
+        });
+        updatedItems.push(addedItem);
+      }
+    }
+
+    for (const id of idsToDelete) {
+      // delete the document with the given id
+      await delGradeData(id);
+    }
+
+    return updatedItems;
+  }
 
   async function addCategory(categoryInfo, gradeArray) {
     // categoryInfo를 Firestore에 추가하고, 추가된 도큐먼트의 ID를 가져옴
@@ -74,6 +109,15 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
     // 추가된 grade 도큐먼트들의 ID를 반환
     return addedGrades.map((grade) => grade.id);
   }
+
+  const handleUpdateOnlyCategory = async (categoryId) => {
+    const updatedCategory = await categoryUpdateData(categoryId, {
+      ...categoryInfo,
+    });
+    const updatedInfo = updatedCategory;
+    console.log(updatedInfo);
+  };
+
   const handleSaveCategoryWithGrades = async () => {
     if (
       categoryInfo.categoryTitle === "" ||
@@ -204,21 +248,18 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
           id: "categoryGender1",
           name: "categoryGender1",
           value: "남자",
-          selected: categoryInfo?.categoryGender === "m",
           text: "남자",
         },
         {
           id: "categoryGender2",
           name: "categoryGender2",
           value: "여자",
-          selected: categoryInfo?.categoryGender === "f",
           text: "여자",
         },
         {
           id: "categoryGender3",
           name: "categoryGender3",
           value: "전부",
-          selected: categoryInfo?.categoryGender === "all",
           text: "전부",
         },
       ],
@@ -253,14 +294,12 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
           id: "categoryLaunched1",
           name: "categoryLaunched1",
           value: "운영",
-          selected: categoryInfo?.categoryLaunched === "운영",
           text: "운영",
         },
         {
           id: "categoryLaunched2",
           name: "categoryLaunched2",
           value: "미운영",
-          selected: categoryInfo?.categoryLaunched === "미운영",
           text: "미운영",
         },
       ],
@@ -464,6 +503,35 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
     setGradeArray([...gradeArray, { ...gradeInfo, gradeIndex }]);
     console.log(gradeArray);
   };
+  const handleEditGrade = (gradeId) => {
+    if (gradeInfo.gradeTitle === "" || gradeInfo.gradeTitle === undefined) {
+      setIsMessageOpen(true);
+      setMessage({
+        title: "오류",
+        body: "체급명은 반드시 입력해야합니다.",
+        isButton: true,
+        confirmButtonText: "확인",
+        cancelButtonText: "",
+      });
+      return;
+    }
+    const findGradeIndex = gradeArray.findIndex(
+      (grade) => grade.id === gradeId
+    );
+    const newGradeArray = [...gradeArray];
+    newGradeArray.splice(findGradeIndex, 1, { ...gradeInfo });
+    setGradeArray([...newGradeArray]);
+    setGradeInfo({
+      gradeTitle: "",
+      gradeFilterType: "키(cm)",
+      gradeMinValue: "",
+      gradeMaxValue: "",
+    });
+    //const gradeIndex = gradeArray?.length ? gradeArray.length + 1 : 1;
+
+    //setGradeArray([...gradeArray, { ...gradeInfo, gradeIndex }]);
+    console.log(gradeArray);
+  };
   const categoryInputRender = (
     <div className="flex w-full flex-col gap-y-0 md:gap-y-5 md:px-5">
       <div className="flex w-full flex-wrap p-5 flex-col gap-y-3 lg:flex-row lg:gap-y-4">
@@ -482,7 +550,12 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
                   onChange={(e) => handleInputChange(e)}
                 >
                   {input.options.map((option) => (
-                    <option value={option.value}>{option.text}</option>
+                    <option
+                      value={option.value}
+                      selected={option.value === categoryInfo[input.name]}
+                    >
+                      {option.text}
+                    </option>
                   ))}
                 </select>
               )}
@@ -534,7 +607,12 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
                   onChange={(e) => handleInputChange(e)}
                 >
                   {input.options.map((option) => (
-                    <option value={option.value}>{option.text}</option>
+                    <option
+                      value={option.value}
+                      selected={option.value === gradeInfo[input.name]}
+                    >
+                      {option.text}
+                    </option>
                   ))}
                 </select>
               )}
@@ -559,7 +637,20 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
             </div>
           </div>
         ))}
-        {(renderMode === "add" || renderMode === "edit") && (
+        {renderMode === "edit" && gradeInfo.id !== undefined && (
+          <div className="flex w-full  justify-end ">
+            <button
+              className="bg-blue-800 px-4 h-10 rounded-lg"
+              onClick={() => handleEditGrade(gradeInfo.id)}
+            >
+              <span className="text-gray-200 font-semibold">
+                체급내용만 수정
+              </span>
+            </button>
+          </div>
+        )}
+        {(renderMode === "add" ||
+          (renderMode === "edit" && gradeInfo.id === undefined)) && (
           <div className="flex w-full  justify-end ">
             <button
               className="bg-blue-800 px-4 h-10 rounded-lg"
@@ -587,6 +678,17 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
   const handleGradeSelect = (index) => {
     setGradeInfo(gradeArray[index]);
   };
+
+  const handleGradeDelete = (index) => {
+    const dummyGradeArray1 = [...gradeArray];
+    const newGradeArray = [...gradeArray];
+    const delGradeArray = dummyGradeArray1.splice(index, 1);
+    newGradeArray.splice(index, 1);
+    console.log(delGradeArray);
+    console.log(newGradeArray);
+
+    setGradeArray([...newGradeArray]);
+  };
   useEffect(() => {
     if (renderMode === "add") {
       setCategoryInfo(initState);
@@ -594,13 +696,21 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
       setCategoryInfo({
         ...categoryGradePair[categoryIndex].category,
       });
-      setGradeArray([...categoryGradePair[categoryIndex].matchedGrades]);
+      const sortedGradeArray = [
+        ...categoryGradePair[categoryIndex].matchedGrades,
+      ].sort((a, b) => a.gradeIndex - b.gradeIndex);
+      setGradeArray(sortedGradeArray);
     }
+    console.log([...categoryGradePair[categoryIndex].matchedGrades]);
   }, [categoryGradePair]);
 
   useEffect(() => {
     console.log(gradeArray);
   }, [gradeArray]);
+  useEffect(() => {
+    console.log(categoryInfo);
+    console.log(gradeInfo);
+  }, [gradeInfo, categoryInfo]);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-5 mt-5">
@@ -620,7 +730,7 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
             {renderMode === "edit" && "종목수정"}
             {renderMode === "read" && "종목내용"}
           </span>
-          {renderMode === "edit" && (
+          {renderMode === "read" && (
             <button
               className="bg-gray-200 px-4 h-10 rounded-lg mr-2"
               onClick={() => setRenderMode("edit")}
@@ -639,6 +749,17 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
           ></div>
         </div>
         <div className="flex h-full w-full p-0">{categoryInputRender}</div>
+
+        {renderMode === "edit" && (
+          <div className="flex w-full justify-end my-2 md:px-10">
+            <button
+              className="bg-gray-200 px-4 h-10 rounded-lg w-34"
+              onClick={() => handleUpdateOnlyCategory(categoryInfo.id)}
+            >
+              <span className="text-gray-900 font-semibold">종목만 저장</span>
+            </button>
+          </div>
+        )}
         <div className="flex w-full h-1 justify-center items-center">
           <div
             className="w-full"
@@ -649,6 +770,21 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
           ></div>
         </div>
         <div className="flex h-full w-full p-0">{gradeInputRender}</div>
+        {renderMode === "edit" && (
+          <div className="flex w-full justify-end md:px-10">
+            <button
+              className="bg-gray-200 px-4 h-10 rounded-lg w-34"
+              onClick={() =>
+                manageGradePool(
+                  categoryGradePair[categoryIndex].matchedGrades,
+                  gradeArray
+                )
+              }
+            >
+              <span className="text-gray-900 font-semibold">체급만 저장</span>
+            </button>
+          </div>
+        )}
         {renderMode === "add" && (
           <div className="flex px-10 py-2 w-full h-full">
             <div
@@ -658,9 +794,15 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
               <div className="flex w-full h-full px-5 items-center flex-wrap gap-2">
                 {gradeArray.length > 0 &&
                   gradeArray.map((grade, gIdx) => (
-                    <div className="w-20 h-8 bg-sky-700 p-2 text-gray-200 rounded-lg flex justify-center items-center">
+                    <div
+                      className="w-20 h-8 bg-sky-700 p-2 text-gray-200 rounded-lg flex justify-center items-center"
+                      onClick={() => handleGradeSelect(gIdx)}
+                    >
                       <span>{grade.gradeTitle}</span>
-                      <button className=" w-3 h-3 flex justify-center items-center text-sm ml-3">
+                      <button
+                        className=" w-3 h-3 flex justify-center items-center text-sm ml-3"
+                        onClick={() => handleGradeDelete(gIdx)}
+                      >
                         <span className="flex items-center justify-center w-full h-full text-gray-900 font-semibold">
                           x
                         </span>
@@ -700,9 +842,15 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
               <div className="flex w-full h-full px-5 items-center flex-wrap gap-2">
                 {gradeArray.length > 0 &&
                   gradeArray.map((grade, gIdx) => (
-                    <div className="w-20 h-8 bg-sky-700 p-2 text-gray-200 rounded-lg flex justify-center items-center">
+                    <div
+                      className="w-20 h-8 bg-sky-700 p-2 text-gray-200 rounded-lg flex justify-center items-center"
+                      onClick={() => handleGradeSelect(gIdx)}
+                    >
                       <span>{grade.gradeTitle}</span>
-                      <button className=" w-3 h-3 flex justify-center items-center text-sm ml-3">
+                      <button
+                        className=" w-3 h-3 flex justify-center items-center text-sm ml-3"
+                        onClick={() => handleGradeDelete(gIdx)}
+                      >
                         <span className="flex items-center justify-center w-full h-full text-gray-900 font-semibold">
                           x
                         </span>

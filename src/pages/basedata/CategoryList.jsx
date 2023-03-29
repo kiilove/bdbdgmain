@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { useState } from "react";
 import { CategoryGradePairContext } from "../../contexts/CategoryGradePairContext";
-import { useFirestoreQuery } from "../../hooks/useFirestores";
 
 const CategoryList = ({ setSelectedTab }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +39,7 @@ const CategoryList = ({ setSelectedTab }) => {
         {categoryGradePair?.length > 0 &&
           categoryGradePair.map((data, idx) => (
             <div
-              className="flex w-full lg:w-52 text-gray-200 rounded-lg p-3 flex-col gap-y-3"
+              className="flex w-full lg:w-56 text-gray-200 rounded-lg  flex-col gap-y-3 border-gray-600 border-2  hover:cursor-pointer  hover:border-gray-200 "
               style={{
                 backgroundColor: "rgba(11,17,66,0.7)",
                 minHeight: "100px",
@@ -60,11 +59,13 @@ const CategoryList = ({ setSelectedTab }) => {
                 }}
               >
                 {data.matchedGrades.length > 0 &&
-                  data.matchedGrades.map((grade, gIdx) => (
-                    <div className="bg-sky-600 rounded-lg px-3">
-                      {grade.gradeTitle}
-                    </div>
-                  ))}
+                  data.matchedGrades
+                    .sort((a, b) => a.gradeIndex - b.gradeIndex)
+                    .map((grade, gIdx) => (
+                      <div className="bg-sky-600 rounded-lg px-3">
+                        {grade.gradeTitle}
+                      </div>
+                    ))}
               </div>
             </div>
           ))}

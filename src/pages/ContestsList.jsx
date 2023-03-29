@@ -22,7 +22,7 @@ const ContestsList = ({ group }) => {
 
   const noticeCard = (contestId, contestNoticeId, imgSrc, title, status) => (
     <div
-      className="flex w-56 h-full flex-col shadow border-2 border-transparent hover:cursor-pointer hover:border-gray-200 rounded-lg"
+      className="flex w-56 h-full flex-col shadow border-2 border-gray-600 hover:cursor-pointer hover:border-gray-200 rounded-lg"
       onClick={() => {
         handleRedirect(contestId, contestNoticeId);
       }}
@@ -34,7 +34,7 @@ const ContestsList = ({ group }) => {
           className="w-full h-full object-cover object-top rounded-t-lg"
         />
       </div>
-      <div className="flex w-full h-full p-3 bg-gray-100 rounded-b-lg flex-col gap-y-2">
+      <div className="flex w-full h-full p-3 bg-gray-100 rounded-b-md flex-col gap-y-2">
         <span className="text-gray-800 font-sans font-semibold text-sm">
           {title}
         </span>
