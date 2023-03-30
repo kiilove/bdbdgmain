@@ -15,18 +15,18 @@ import {
 import { db } from "../firebase";
 import deepEqual from "deep-equal";
 
-export function useFirestoreQuery(
-  collectionName,
-  conditions = [], // 배열로 기본값을 설정
-  orderByField = "", // 빈 문자열로 기본값을 설정
-  orderByDirection = "asc", // 기본값을 'asc'로 설정
-  limitNumber = 0 // 0으로 기본값을 설정
-) {
+export function useFirestoreQuery() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  async function getDocuments() {
+  async function getDocuments(
+    collectionName,
+    conditions = [],
+    orderByField = "",
+    orderByDirection = "asc",
+    limitNumber = 0
+  ) {
     let q = collection(db, collectionName);
     if (conditions.length > 0) {
       conditions.forEach((condition) => {
@@ -43,6 +43,14 @@ export function useFirestoreQuery(
     try {
       setLoading(true);
       const querySnapshot = await getDocs(q);
+
+      // 데이터가 없는 경우 처리
+      if (querySnapshot.docs.length === 0) {
+        setData([]);
+        setLoading(false);
+        return;
+      }
+
       const documents = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),

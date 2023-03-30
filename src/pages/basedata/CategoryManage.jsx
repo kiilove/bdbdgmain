@@ -12,7 +12,7 @@ import {
 } from "../../hooks/useFirestores";
 import ConfirmationModal from "../../messageboxs/ConfirmationModal";
 
-const CategoryAdd = ({ mode, categoryIndex }) => {
+const CategoryManage = ({ mode, categoryIndex }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [renderMode, setRenderMode] = useState(mode || "edit");
   const [categroyIndexLastNumber, setCategoryIndexLastNumber] = useState(0);
@@ -690,6 +690,9 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
     setGradeArray([...newGradeArray]);
   };
   useEffect(() => {
+    if (!categoryGradePair) {
+      return;
+    }
     if (renderMode === "add") {
       setCategoryInfo(initState);
     } else {
@@ -887,4 +890,4 @@ const CategoryAdd = ({ mode, categoryIndex }) => {
   );
 };
 
-export default CategoryAdd;
+export default CategoryManage;

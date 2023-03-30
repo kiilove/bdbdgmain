@@ -62,7 +62,7 @@ const Sidebar = () => {
       style={{ backgroundColor: "rgba(16,26,66,0.7)", minHeight: "800px" }}
     >
       <div className="flex w-full h-20">
-        <span className="text-gray-100 text-2xl font-bold">BDBDg협회</span>
+        <span className="text-gray-100 text-2xl font-bold">BDBDg관리자</span>
       </div>
       {Menus.map((menu, idx) => (
         <div

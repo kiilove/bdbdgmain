@@ -6,13 +6,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CategoryGradePairContext } from "../../contexts/CategoryGradePairContext";
 import { useFirestoreQuery } from "../../hooks/useFirestores";
-import CategoryAdd from "../basedata/CategoryAdd";
+import CategoryManage from "../basedata/CategoryManage";
 import CategoryList from "../basedata/CategoryList";
 import Loading from "../Loading";
 
 const CategoryOnlyAdmin = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [getCategorys, setGetCategorys] = useState([]);
+  const [getGrades, setGetGrades] = useState([]);
   const [dataPair, setDataPair] = useState([]);
 
   const [selectedTab, setSelectedTab] = useState({
@@ -24,19 +26,47 @@ const CategoryOnlyAdmin = () => {
     CategoryGradePairContext
   );
 
-  const {
-    data: categoryData,
-    loading: categoryLoading,
-    error: categoryError,
-    getDocuments: categoryGetDocuments,
-  } = useFirestoreQuery("category_pool");
+  const categoryQuery = useFirestoreQuery();
+  const gradeQuery = useFirestoreQuery();
 
-  const {
-    data: gradeData,
-    loading: gradeLoading,
-    error: gradeError,
-    getDocuments: gradeGetDocuments,
-  } = useFirestoreQuery("grade_pool");
+  const fetchCategorys = async () => {
+    try {
+      const fetchData = await categoryQuery.getDocuments("category_pool");
+
+      const documents = fetchData.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setGetCategorys(documents);
+    } catch (error) {
+      setGetCategorys(undefined);
+      console.error(error.code);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchGrades = async () => {
+    try {
+      const fetchData = await gradeQuery.getDocuments("grade_pool");
+
+      const documents = fetchData.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setGetGrades(documents);
+    } catch (error) {
+      setGetGrades(undefined);
+      console.error(error.code);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const navigate = useNavigate();
   const tabs = [
     {
@@ -58,19 +88,22 @@ const CategoryOnlyAdmin = () => {
   );
 
   useEffect(() => {
-    if (categoryData.length > 0 && gradeData.length > 0) {
-      const sortedCategoryData = [...categoryData].sort(
+    if (!getCategorys || !getGrades) {
+      return;
+    }
+    if (getCategorys.length > 0 && getGrades.length > 0) {
+      const sortedCategoryData = [...getCategorys].sort(
         (a, b) => a.categoryIndex - b.categoryIndex
       );
       const newDataPair = sortedCategoryData.map((category) => {
-        const matchedGrades = gradeData.filter(
+        const matchedGrades = getGrades.filter(
           (grade) => grade.refCategoryId === category.id
         );
         return { category, matchedGrades };
       });
       setDataPair(newDataPair);
     }
-  }, [categoryData, gradeData]);
+  }, [getCategorys, getGrades]);
 
   useEffect(() => {
     if (dataPair.length) {
@@ -78,6 +111,11 @@ const CategoryOnlyAdmin = () => {
       setIsLoading(false);
     }
   }, [dataPair]);
+
+  useEffect(() => {
+    fetchCategorys();
+    fetchGrades();
+  }, []);
 
   function handleTabClick(tab) {
     setSelectedTab(tab);
@@ -121,22 +159,22 @@ const CategoryOnlyAdmin = () => {
       </div>
       {
         <div className="flex w-full">
-          {selectedTab.id === "전체목록" && dataPair.length > 0 && (
+          {selectedTab.id === "전체목록" && dataPair?.length > 0 && (
             <CategoryList setSelectedTab={setSelectedTab} />
           )}
-          {selectedTab.id === "종목보기" && dataPair.length > 0 && (
-            <CategoryAdd
+          {selectedTab.id === "종목보기" && dataPair?.length > 0 && (
+            <CategoryManage
               mode={"read"}
               categoryIndex={selectedTab.categoryIndex}
             />
           )}
-          {selectedTab.id === "종목수정" && dataPair.length > 0 && (
-            <CategoryAdd
+          {selectedTab.id === "종목수정" && dataPair?.length > 0 && (
+            <CategoryManage
               mode={"edit"}
               categoryIndex={selectedTab.categoryIndex}
             />
           )}
-          {selectedTab.id === "종목추가" && <CategoryAdd mode={"add"} />}
+          {selectedTab.id === "종목추가" && <CategoryManage mode={"add"} />}
         </div>
       }
     </div>

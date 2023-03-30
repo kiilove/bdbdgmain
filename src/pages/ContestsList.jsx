@@ -1,5 +1,5 @@
 import { where } from "firebase/firestore";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useFirestoreQuery } from "../hooks/useFirestores";
 import Loading from "./Loading";
 import { useNavigate } from "react-router-dom";
@@ -7,14 +7,35 @@ import { useNavigate } from "react-router-dom";
 const ContestsList = ({ group }) => {
   const [getNotices, setGetNotices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const {
-    data: noticeData,
-    loading: noticeLoading,
-    error: noticeError,
-  } = useFirestoreQuery("contest_notice", [
-    where("contestStatus", "==", "접수중"),
-  ]);
+  const noticeQuery = useFirestoreQuery();
+
+  const fetchNotices = async () => {
+    try {
+      const fetchData = await noticeQuery.getDocuments("contest_notice", [
+        where("contestStatus", "==", "접수중"),
+      ]);
+
+      const documents = fetchData.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setGetNotices(documents);
+    } catch (error) {
+      setGetNotices(undefined);
+      console.error(error.code);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotices();
+    console.log(getNotices);
+  }, []);
 
   const handleRedirect = (contestId, contestNoticeId) => {
     navigate(`/contestview/${contestId}`);
@@ -45,13 +66,6 @@ const ContestsList = ({ group }) => {
     </div>
   );
 
-  useEffect(() => {
-    if (noticeData.length > 0) {
-      setGetNotices([...noticeData]);
-      setIsLoading(false);
-    }
-  }, [noticeData]);
-
   return (
     <div className="flex w-full h-full ">
       <div
@@ -74,7 +88,7 @@ const ContestsList = ({ group }) => {
         </div>
         <div className="flex h-full w-full p-5 ">
           {isLoading && <Loading />}
-          {getNotices.length > 0 &&
+          {getNotices?.length > 0 &&
             getNotices.map((notice, idx) =>
               noticeCard(
                 notice.refContestId,

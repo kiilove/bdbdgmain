@@ -52,9 +52,9 @@ export const Menus = [
     title: "관리자메뉴",
     link: "/",
     subMenu: [
-      { index: 0, title: "종목/체급등록", link: "/categoryonlyadmin" },
-      { index: 1, title: "협회등록", link: "/" },
-      { index: 2, title: "심판등록", link: "/" },
+      { index: 0, title: "종목/체급관리", link: "/categoryonlyadmin" },
+      { index: 1, title: "협회관리", link: "/promoteronlyadmin" },
+      { index: 2, title: "심판관리", link: "/judgeonlyadmin" },
     ],
   },
 ];
