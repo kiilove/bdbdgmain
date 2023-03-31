@@ -9,6 +9,7 @@ import ContestNotice from "./pages/ContestNotice";
 import ContestsList from "./pages/ContestsList";
 import ContestView from "./pages/ContestView";
 import Home from "./pages/Home";
+import InvoiceList from "./pages/InvoiceList";
 import CategoryOnlyAdmin from "./pages/onlyadmin/CategoryOnlyAdmin";
 import JudgeOnlyAdmin from "./pages/onlyadmin/JudgeOnlyAdmin";
 import PromoterOnlyAdmin from "./pages/onlyadmin/PromoterOnlyAdmin";
@@ -24,7 +25,7 @@ function App() {
             <Route
               path="/startcontest"
               element={<Home children={<StartPage />} />}
-            />{" "}
+            />
             <Route
               path="/contestlistpre"
               element={<Home children={<ContestsList group={"pre"} />} />}
@@ -32,6 +33,10 @@ function App() {
             <Route
               path="/contestnotice"
               element={<Home children={<ContestNotice />} />}
+            />
+            <Route
+              path="/invoicelist"
+              element={<Home children={<InvoiceList />} />}
             />
             <Route
               path="/categoryonlyadmin"
