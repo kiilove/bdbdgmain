@@ -19,67 +19,49 @@ function App() {
   return (
     <CurrentContestProvider>
       <SelectedMenuProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route
-              path="/startcontest"
-              element={<Home children={<StartPage />} />}
-            />
-            <Route
-              path="/contestlistpre"
-              element={<Home children={<ContestsList group={"pre"} />} />}
-            />
-            <Route
-              path="/contestnotice"
-              element={<Home children={<ContestNotice />} />}
-            />
-            <Route
-              path="/invoicelist"
-              element={<Home children={<InvoiceList />} />}
-            />
-            <Route
-              path="/categoryonlyadmin"
-              element={
-                <Home
-                  children={
-                    <CategoryGradePairProvider>
-                      <CategoryOnlyAdmin />
-                    </CategoryGradePairProvider>
-                  }
-                />
-              }
-            />
-            <Route
-              path="/promoteronlyadmin"
-              element={
-                <Home
-                  children={
-                    <PromoterContextProvider>
-                      <PromoterOnlyAdmin />
-                    </PromoterContextProvider>
-                  }
-                />
-              }
-            />
-            <Route
-              path="/judgeonlyadmin"
-              element={
-                <Home
-                  children={
-                    <JudgeContextProvider>
-                      <JudgeOnlyAdmin />
-                    </JudgeContextProvider>
-                  }
-                />
-              }
-            />
-            <Route
-              path="/contestview/:contestId"
-              element={<Home children={<ContestView />} />}
-            />
-          </Routes>
-        </BrowserRouter>
+        <JudgeContextProvider>
+          <PromoterContextProvider>
+            <CategoryGradePairProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route
+                    path="/startcontest"
+                    element={<Home children={<StartPage />} />}
+                  />
+                  <Route
+                    path="/contestlistpre"
+                    element={<Home children={<ContestsList group={"pre"} />} />}
+                  />
+                  <Route
+                    path="/contestnotice"
+                    element={<Home children={<ContestNotice />} />}
+                  />
+                  <Route
+                    path="/invoicelist"
+                    element={<Home children={<InvoiceList />} />}
+                  />
+                  <Route
+                    path="/categoryonlyadmin"
+                    element={<Home children={<CategoryOnlyAdmin />} />}
+                  />
+                  <Route
+                    path="/promoteronlyadmin"
+                    element={<Home children={<PromoterOnlyAdmin />} />}
+                  />
+                  <Route
+                    path="/judgeonlyadmin"
+                    element={<Home children={<JudgeOnlyAdmin />} />}
+                  />
+                  <Route
+                    path="/contestview/:contestId"
+                    element={<Home children={<ContestView />} />}
+                  />
+                </Routes>
+              </BrowserRouter>
+            </CategoryGradePairProvider>
+          </PromoterContextProvider>
+        </JudgeContextProvider>
       </SelectedMenuProvider>
     </CurrentContestProvider>
   );

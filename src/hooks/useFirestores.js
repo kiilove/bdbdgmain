@@ -48,19 +48,22 @@ export function useFirestoreQuery() {
       if (querySnapshot.docs.length === 0) {
         setData([]);
         setLoading(false);
-        return;
+        return [];
       }
 
       const documents = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
+
       setData(documents);
       setLoading(false);
+      return documents;
     } catch (error) {
       console.error(error);
       setError(error);
       setLoading(false);
+      return [];
     }
   }
 

@@ -9,6 +9,8 @@ import useFirebaseStorage from "../../hooks/useFirebaseStorage";
 
 import ConfirmationModal from "../../messageboxs/ConfirmationModal";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { PromoterContext } from "../../contexts/PromoterContext";
 
 const PromoterManage = ({ mode, promoterId }) => {
   const [renderMode, setRenderMode] = useState(mode || "edit");
@@ -21,6 +23,7 @@ const PromoterManage = ({ mode, promoterId }) => {
   const updatePromoter = useFirestoreUpdateData("promoter_pool");
   const uploadLogo = useFirebaseStorage(logoFiles, "image/logos");
   const uploadStamp = useFirebaseStorage(stampFiles, "image/stamps");
+  const { promoterList, setPromoterList } = useContext(PromoterContext);
 
   const [selectedTab, setSelectedTab] = useState({
     id: "전체목록",
@@ -93,6 +96,11 @@ const PromoterManage = ({ mode, promoterId }) => {
           confirmButtonText: "확인",
           cancelButtonText: "",
         });
+        const newPromoterList = [...promoterList];
+        newPromoterList.push({
+          ...promoterInfo,
+        });
+        setPromoterList(newPromoterList);
       }
     } catch (error) {
       console.error(error.message);
@@ -132,6 +140,20 @@ const PromoterManage = ({ mode, promoterId }) => {
       console.error(error.message);
     }
   };
+
+  const handlePromoterInfo = () => {
+    const findPromoter = promoterList.find(
+      (promoter) => promoter.id === promoterId
+    );
+    console.log(findPromoter);
+    setPromoterInfo({ ...findPromoter });
+  };
+
+  useEffect(() => {
+    if (renderMode === "read" || renderMode === "edit") {
+      handlePromoterInfo();
+    }
+  }, [renderMode]);
 
   useEffect(() => {
     if (uploadLogo.urls.length > 0) {
@@ -409,7 +431,7 @@ const PromoterManage = ({ mode, promoterId }) => {
             {renderMode === "read" && "협회내용"}
           </span>
 
-          {renderMode === "edit" && (
+          {renderMode === "read" && (
             <button
               className="bg-gray-200 px-4 h-10 rounded-lg mr-2"
               onClick={() => setRenderMode("edit")}
@@ -439,12 +461,35 @@ const PromoterManage = ({ mode, promoterId }) => {
                 }}
               ></div>
             </div>
+
             <div className="flex h-full w-full p-5 justify-end">
               <button
                 className="bg-gray-200 px-4 h-10 rounded-lg"
                 onClick={() => handleAddPromoter()}
               >
                 <span className="text-gray-900 font-semibold">작성완료</span>
+              </button>
+            </div>
+          </>
+        )}
+        {renderMode === "edit" && (
+          <>
+            <div className="flex w-full h-1 justify-center items-center">
+              <div
+                className="w-full"
+                style={{
+                  height: "1px",
+                  background: "radial-gradient(farthest-side,#a3a3a3, #0c1964)",
+                }}
+              ></div>
+            </div>
+
+            <div className="flex h-full w-full p-5 justify-end">
+              <button
+                className="bg-gray-200 px-4 h-10 rounded-lg"
+                onClick={() => handleUpdatePromoter()}
+              >
+                <span className="text-gray-900 font-semibold">수정완료</span>
               </button>
             </div>
           </>

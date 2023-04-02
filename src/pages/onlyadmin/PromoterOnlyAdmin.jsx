@@ -29,12 +29,7 @@ const PromoterOnlyAdmin = ({ mode }) => {
     try {
       const fetchData = await promoterQuery.getDocuments("promoter_pool");
 
-      const documents = fetchData.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setPromoterList(documents);
+      setPromoterList(fetchData);
     } catch (error) {
       setPromoterList(undefined);
       console.error(error.code);
@@ -69,8 +64,13 @@ const PromoterOnlyAdmin = ({ mode }) => {
   }, []);
 
   function handleTabClick(tab) {
+    console.log(tab);
     setSelectedTab(tab);
   }
+
+  useEffect(() => {
+    console.log(selectedTab);
+  }, [selectedTab]);
 
   return (
     <div className="flex w-full flex-col mt-5">
@@ -112,8 +112,8 @@ const PromoterOnlyAdmin = ({ mode }) => {
           {selectedTab.id === "전체목록" && promoterList?.length > 0 && (
             <PromoterList setSelectedTab={setSelectedTab} />
           )}
-          {selectedTab.id === "협회보기" && promoterList?.length > 0 && (
-            <PromoterManage mode={"read"} promoterId={selectedTab.id} />
+          {selectedTab.id === "협회내용" && promoterList?.length > 0 && (
+            <PromoterManage mode={"read"} promoterId={selectedTab.promoterId} />
           )}
           {selectedTab.id === "협회수정" && promoterList?.length > 0 && (
             <PromoterManage mode={"edit"} promoterId={selectedTab.id} />

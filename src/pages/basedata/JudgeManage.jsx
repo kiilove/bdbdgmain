@@ -9,6 +9,8 @@ import useFirebaseStorage from "../../hooks/useFirebaseStorage";
 
 import ConfirmationModal from "../../messageboxs/ConfirmationModal";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { JudgeContext } from "../../contexts/JudgeContext";
 
 const JudgeManage = ({ mode, judgeId }) => {
   const [renderMode, setRenderMode] = useState(mode || "edit");
@@ -19,6 +21,9 @@ const JudgeManage = ({ mode, judgeId }) => {
   const addJudge = useFirestoreAddData("judge_pool");
   const updateJudge = useFirestoreUpdateData("judge_pool");
   const uploadFiles = useFirebaseStorage(files, "image/judge/profiles");
+  const { judgeList, setJudgeList } = useContext(JudgeContext);
+
+  console.log(judgeId);
 
   const [selectedTab, setSelectedTab] = useState({
     id: "전체목록",
@@ -86,6 +91,11 @@ const JudgeManage = ({ mode, judgeId }) => {
           confirmButtonText: "확인",
           cancelButtonText: "",
         });
+        const newJudgeList = [...judgeList];
+        newJudgeList.push({
+          ...judgeInfo,
+        });
+        setJudgeList(newJudgeList);
       }
     } catch (error) {
       console.error(error.message);
@@ -125,6 +135,18 @@ const JudgeManage = ({ mode, judgeId }) => {
       console.error(error.message);
     }
   };
+
+  const handleJudgeInfo = () => {
+    const findJudge = judgeList.find((judge) => judge.id === judgeId);
+    console.log(findJudge);
+    setJudgeInfo({ ...findJudge });
+  };
+
+  useEffect(() => {
+    if (renderMode === "read" || renderMode === "edit") {
+      handleJudgeInfo();
+    }
+  }, [renderMode]);
 
   useEffect(() => {
     if (uploadFiles.urls.length > 0) {
@@ -379,7 +401,7 @@ const JudgeManage = ({ mode, judgeId }) => {
             {renderMode === "read" && "심판정보"}
           </span>
 
-          {renderMode === "edit" && (
+          {renderMode === "read" && (
             <button
               className="bg-gray-200 px-4 h-10 rounded-lg mr-2"
               onClick={() => setRenderMode("edit")}
@@ -415,6 +437,27 @@ const JudgeManage = ({ mode, judgeId }) => {
                 onClick={() => handleAddJudge()}
               >
                 <span className="text-gray-900 font-semibold">작성완료</span>
+              </button>
+            </div>
+          </>
+        )}
+        {renderMode === "edit" && (
+          <>
+            <div className="flex w-full h-1 justify-center items-center">
+              <div
+                className="w-full"
+                style={{
+                  height: "1px",
+                  background: "radial-gradient(farthest-side,#a3a3a3, #0c1964)",
+                }}
+              ></div>
+            </div>
+            <div className="flex h-full w-full p-5 justify-end">
+              <button
+                className="bg-gray-200 px-4 h-10 rounded-lg"
+                onClick={() => handleUpdateJudge()}
+              >
+                <span className="text-gray-900 font-semibold">수정완료</span>
               </button>
             </div>
           </>

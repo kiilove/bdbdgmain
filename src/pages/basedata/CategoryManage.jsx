@@ -55,6 +55,19 @@ const CategoryManage = ({ mode, categoryIndex }) => {
     }
   };
 
+  const handleIndexNumber = () => {
+    let indexNumber = categroyIndexLastNumber;
+    console.log("first1");
+    if (categoryGradePair.length <= indexNumber) {
+      indexNumber = indexNumber + 1;
+    } else {
+      console.log("first");
+      indexNumber = categoryGradePair.length + 1;
+    }
+    setCategoryIndexLastNumber((prev) => (prev = indexNumber));
+    return indexNumber;
+  };
+
   async function manageGradePool(original, modified) {
     const idsToDelete = original
       .filter(
@@ -115,7 +128,15 @@ const CategoryManage = ({ mode, categoryIndex }) => {
       ...categoryInfo,
     });
     const updatedInfo = updatedCategory;
-    console.log(updatedInfo);
+    const prevCategoryGradePair = [...categoryGradePair];
+
+    const newCategory = {
+      ...prevCategoryGradePair[categoryIndex],
+      category: { ...updatedInfo },
+    };
+    prevCategoryGradePair.splice(categoryIndex, 1, newCategory);
+
+    setCategoryGradePair(prevCategoryGradePair);
   };
 
   const handleSaveCategoryWithGrades = async () => {
@@ -168,6 +189,7 @@ const CategoryManage = ({ mode, categoryIndex }) => {
       id: "categoryIndex",
       required: true,
       value: categoryInfo?.categoryIndex,
+
       disabled: renderMode === "add" || renderMode === "edit" ? false : true,
       label:
         renderMode === "add" || renderMode === "edit" ? (
@@ -552,7 +574,10 @@ const CategoryManage = ({ mode, categoryIndex }) => {
                   {input.options.map((option) => (
                     <option
                       value={option.value}
-                      selected={option.value === categoryInfo[input.name]}
+                      selected={
+                        renderMode !== "add" &&
+                        option.value === categoryInfo[input.name]
+                      }
                     >
                       {option.text}
                     </option>
@@ -664,17 +689,6 @@ const CategoryManage = ({ mode, categoryIndex }) => {
     </div>
   );
 
-  const handleIndexNumber = () => {
-    let indexNumber = categroyIndexLastNumber;
-    if (categoryGradePair.length <= indexNumber) {
-      indexNumber = indexNumber + 1;
-    } else {
-      indexNumber = categoryGradePair.length + 1;
-    }
-    setCategoryIndexLastNumber((prev) => (prev = indexNumber));
-    return indexNumber;
-  };
-
   const handleGradeSelect = (index) => {
     setGradeInfo(gradeArray[index]);
   };
@@ -704,7 +718,7 @@ const CategoryManage = ({ mode, categoryIndex }) => {
       ].sort((a, b) => a.gradeIndex - b.gradeIndex);
       setGradeArray(sortedGradeArray);
     }
-    console.log([...categoryGradePair[categoryIndex].matchedGrades]);
+    //console.log([...categoryGradePair[categoryIndex]?.matchedGrades]);
   }, [categoryGradePair]);
 
   useEffect(() => {

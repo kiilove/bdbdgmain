@@ -30,12 +30,7 @@ const JudgeOnlyAdmin = ({ mode }) => {
     try {
       const fetchData = await judgeQuery.getDocuments("judge_pool");
 
-      const documents = fetchData.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setGetJudges(documents);
+      setJudgeList(fetchData);
     } catch (error) {
       setGetJudges(undefined);
       console.error(error.code);
@@ -114,10 +109,10 @@ const JudgeOnlyAdmin = ({ mode }) => {
             <JudgeList setSelectedTab={setSelectedTab} />
           )}
           {selectedTab.id === "심판정보" && judgeList?.length > 0 && (
-            <JudgeManage mode={"read"} judgeId={selectedTab.id} />
+            <JudgeManage mode={"read"} judgeId={selectedTab.judgeId} />
           )}
           {selectedTab.id === "심판수정" && judgeList?.length > 0 && (
-            <JudgeManage mode={"edit"} judgeId={selectedTab.id} />
+            <JudgeManage mode={"edit"} judgeId={selectedTab.judgeId} />
           )}
           {selectedTab.id === "심판추가" && <JudgeManage mode={"add"} />}
         </div>

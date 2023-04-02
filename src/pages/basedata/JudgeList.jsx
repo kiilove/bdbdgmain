@@ -41,15 +41,18 @@ const JudgeList = ({ setSelectedTab }) => {
               }
             >
               <div className="flex w-full justify-center items-center h-10  rounded-lg text-sm font-normal lg:text-base lg:font-semibold">
-                {data.promoterFullTitle}
+                {data.judgeName}
               </div>
               <div
-                className="flex w-full flex-wrap gap-2 justify-start items-center h-full  rounded-lg text-sm p-3"
+                className="flex w-full flex-wrap gap-2 justify-start items-center h-full  rounded-lg text-sm p-3 flex-col"
                 style={{
                   backgroundColor: "rgba(11,17,46,0.7)",
                   minHeight: "30px",
                 }}
-              ></div>
+              >
+                <div className="flex">{data.judgeEmail}</div>
+                <div className="flex">{data.judgePhoneNumber}</div>
+              </div>
             </div>
           ))}
       </div>

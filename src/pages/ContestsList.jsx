@@ -17,12 +17,7 @@ const ContestsList = ({ group }) => {
         where("contestStatus", "==", "접수중"),
       ]);
 
-      const documents = fetchData.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      setGetNotices(documents);
+      setGetNotices(fetchData);
     } catch (error) {
       setGetNotices(undefined);
       console.error(error.code);
