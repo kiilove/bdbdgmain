@@ -22,47 +22,59 @@ const CategoryList = ({ setSelectedTab, mode }) => {
   } = useContext(CategoryGradePairContext);
 
   const handleItemClick = (item) => {
+    console.log(item);
     if (renderMode === "admin") {
       setSelectedTab({ id: "종목보기", categoryIndex: item.category.id });
     } else if (renderMode === "choice") {
       const selectedCategory = item.category;
-      const selectedGrade = item.matchedGrades;
-      const selectedItem = {
+      const selectedItemsToAdd = item.matchedGrades.flatMap((grade) => ({
         category: selectedCategory,
-        matchedGrades: selectedGrade,
-      };
-      const itemExists = selectedItems.some(
-        (item) => item.category.id === selectedCategory.id
-      );
-      let newSelectedItems = selectedItems.slice();
-      if (itemExists) {
-        newSelectedItems = newSelectedItems.filter(
-          (item) => item.category.id !== selectedCategory.id
+        matchedGrades: grade,
+      }));
+      setSelectedItems((prevSelectedItems) => {
+        const existingItems = prevSelectedItems.filter(
+          (selectedItem) => selectedItem.category.id === selectedCategory.id
         );
-      } else {
-        console.log(selectedItem);
-        newSelectedItems.push(selectedItem);
-      }
-      setSelectedItems(newSelectedItems);
-      console.log(selectedItem);
+        const newSelectedItemsToAdd = selectedItemsToAdd.filter(
+          (selectedItem) =>
+            !existingItems.some(
+              (item) =>
+                item.matchedGrades.refCategoryId ===
+                selectedItem.matchedGrades.refCategoryId
+            )
+        );
+        const itemsToRemove = existingItems.filter(
+          (existingItem) =>
+            !selectedItemsToAdd.some(
+              (item) =>
+                item.matchedGrades.refCategoryId ===
+                existingItem.matchedGrades.refCategoryId
+            )
+        );
+        return [
+          ...prevSelectedItems.filter(
+            (selectedItem) =>
+              !itemsToRemove.some(
+                (item) =>
+                  item.matchedGrades.refCategoryId ===
+                  selectedItem.matchedGrades.refCategoryId
+              )
+          ),
+          ...newSelectedItemsToAdd,
+        ];
+      });
     }
   };
 
   const handleSelectAll = () => {
     if (renderMode === "choice") {
-      const allIndices = categoryGradePair;
-      const allItems = allIndices.reduce((acc, cur) => {
-        const { category, matchedGrades } = cur;
-        if (matchedGrades.length) {
-          const selectedGrades = matchedGrades; // 모든 matchedGrades 객체를 선택하도록 수정
-          const selectedItems = selectedGrades.map((grade) => ({
-            category,
-            matchedGrades: grade,
-          }));
-          return [...acc, ...selectedItems];
-        }
-        return acc;
-      }, []);
+      const allItems = categoryGradePair.flatMap((data) => {
+        const { category, matchedGrades } = data;
+        return matchedGrades.map((grade) => ({
+          category,
+          matchedGrades: grade,
+        }));
+      });
       setSelectedItems(allItems);
       setAllChecked(true);
     }
