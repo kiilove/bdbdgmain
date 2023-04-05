@@ -9,11 +9,12 @@ import ContestNotice from "./pages/ContestNotice";
 import ContestsList from "./pages/ContestsList";
 import ContestView from "./pages/ContestView";
 import Home from "./pages/Home";
-import InvoiceList from "./pages/InvoiceList";
 import CategoryOnlyAdmin from "./pages/onlyadmin/CategoryOnlyAdmin";
 import JudgeOnlyAdmin from "./pages/onlyadmin/JudgeOnlyAdmin";
 import PromoterOnlyAdmin from "./pages/onlyadmin/PromoterOnlyAdmin";
 import StartPage from "./pages/StartPage";
+import EntryList from "./pages/EntryList";
+import EntryForm from "./pages/EntryForm";
 
 function App() {
   return (
@@ -38,8 +39,12 @@ function App() {
                     element={<Home children={<ContestNotice />} />}
                   />
                   <Route
-                    path="/invoicelist"
-                    element={<Home children={<InvoiceList />} />}
+                    path="/entrylist"
+                    element={<Home children={<EntryList />} />}
+                  />
+                  <Route
+                    path="/entryform"
+                    element={<Home children={<EntryForm />} />}
                   />
                   <Route
                     path="/categoryonlyadmin"

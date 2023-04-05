@@ -78,7 +78,7 @@ const CategoryOnlyAdmin = () => {
         </div>
       </div>
       {
-        <div className="flex w-full">
+        <div className="flex w-full mt-5">
           {selectedTab.id === "전체목록" && (
             <CategoryList setSelectedTab={setSelectedTab} />
           )}

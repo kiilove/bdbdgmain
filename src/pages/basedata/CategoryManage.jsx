@@ -12,11 +12,12 @@ import {
 } from "../../hooks/useFirestores";
 import ConfirmationModal from "../../messageboxs/ConfirmationModal";
 
-const CategoryManage = ({ mode, categoryIndex }) => {
+const CategoryManage = ({ mode, categoryId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [renderMode, setRenderMode] = useState(mode || "edit");
   const [categroyIndexLastNumber, setCategoryIndexLastNumber] = useState(0);
   const [categoryInfo, setCategoryInfo] = useState({});
+  const [categoryIndex, setCategoryIndex] = useState(0);
   const [gradeInfo, setGradeInfo] = useState({});
   const [gradeArray, setGradeArray] = useState([]);
   const [message, setMessage] = useState({});
@@ -473,6 +474,7 @@ const CategoryManage = ({ mode, categoryIndex }) => {
   const handleModalClose = () => {
     setIsMessageOpen(false);
   };
+
   const handleInputChange = (e) => {
     const isGrade = e.target.name.startsWith("grade");
     if (!isGrade) {
@@ -710,15 +712,19 @@ const CategoryManage = ({ mode, categoryIndex }) => {
     if (renderMode === "add") {
       setCategoryInfo(initState);
     } else {
+      const filterdCategory = categoryGradePair.find(
+        (category) => category.id === categoryId
+      );
+      console.log(filterdCategory);
       setCategoryInfo({
-        ...categoryGradePair[categoryIndex].category,
+        ...filterdCategory.category,
       });
-      const sortedGradeArray = [
-        ...categoryGradePair[categoryIndex].matchedGrades,
-      ].sort((a, b) => a.gradeIndex - b.gradeIndex);
+      const sortedGradeArray = [...filterdCategory.matchedGrades].sort(
+        (a, b) => a.gradeIndex - b.gradeIndex
+      );
       setGradeArray(sortedGradeArray);
     }
-    //console.log([...categoryGradePair[categoryIndex]?.matchedGrades]);
+    //console.log([...categoryGradePair[categoryId]?.matchedGrades]);
   }, [categoryGradePair]);
 
   useEffect(() => {

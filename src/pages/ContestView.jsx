@@ -7,6 +7,7 @@ import Loading from "./Loading";
 import { RiMap2Fill, RiCalendarFill, RiApps2Fill } from "react-icons/ri";
 import { useRef } from "react";
 import CategoryList from "./basedata/CategoryList";
+import EntryList from "./EntryList";
 
 const ContestView = () => {
   const param = useParams();
@@ -35,7 +36,7 @@ const ContestView = () => {
         />
       ),
     },
-    { id: "참가신청서", text: "참가신청서" },
+    { id: "참가신청서", text: "참가신청서", component: <EntryList /> },
     {
       id: "종목체급관리",
       text: "종목/체급 관리",

@@ -19,7 +19,8 @@ export const Menus = [
     link: "/",
     subMenu: [
       { index: 0, title: "대회공고", link: "/contestlistpre" },
-      { index: 1, title: "참가신청서", link: "/invoicelist" },
+      { index: 1, title: "참가신청서", link: "/entrylist" },
+      { index: 1, title: "참가신청서 대리작성", link: "/entryform" },
       { index: 2, title: "종목/체급관리", link: "/" },
       { index: 3, title: "심판배정", link: "/" },
       { index: 4, title: "확정명단", link: "/" },

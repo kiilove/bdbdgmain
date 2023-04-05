@@ -87,6 +87,7 @@ export function useFirestoreGetDocument(collectionName) {
       if (docSnapshot.exists()) {
         const getData = { id: docSnapshot.id, ...docSnapshot.data() };
         setData({ id: docSnapshot.id, ...docSnapshot.data() });
+        return getData;
       } else {
         setError({ message: "Document does not exist" });
         setData([]);
@@ -135,6 +136,7 @@ export function useFirestoreUpdateData(collectionName) {
 
   const updateData = async (id, newData, callback) => {
     console.log(id);
+    console.log(newData);
     try {
       setLoading(true);
       await updateDoc(doc(db, collectionName, id), newData);

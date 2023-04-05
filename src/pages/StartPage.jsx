@@ -17,7 +17,7 @@ const StartPage = () => {
   const contestJudgesListHook = useFirestoreAddData("contest_judges_list");
   const contestCategoryListHook = useFirestoreAddData("contest_category_list");
   const contestGradesListHook = useFirestoreAddData("contest_grades_list");
-  const contestInvoicesListHook = useFirestoreAddData("contest_invoices_list");
+  const contestEntryListHook = useFirestoreAddData("contest_entry_list");
   const { setCurrentContest } = useContext(CurrentContestContext);
   const navigate = useNavigate();
 
@@ -32,7 +32,7 @@ const StartPage = () => {
         contestJudgesListData,
         contestCategoryListData,
         contestGradesListData,
-        contestInvoicesListData,
+        contestEntryListData,
       ] = await Promise.all([
         contestNoticeHook
           .addData({
@@ -69,10 +69,10 @@ const StartPage = () => {
             console.error("Error adding contest grades list:", error);
             return null;
           }),
-        contestInvoicesListHook
+        contestEntryListHook
           .addData({
             refContestId: addedContest.id,
-            invoiceIds: [],
+            entryIds: [],
           })
           .catch((error) => {
             console.error("Error adding contest invoices list:", error);
@@ -86,14 +86,14 @@ const StartPage = () => {
         contestJudgesListData &&
         contestCategoryListData &&
         contestGradesListData &&
-        contestInvoicesListData
+        contestEntryListData
       ) {
         await updateContest.updateData(addedContest.id, {
           contestNoticeId: contestNoticeData.id,
           contestJudgesListId: contestJudgesListData.id,
           contestCategoryListId: contestCategoryListData.id,
           contestGradesListId: contestGradesListData.id,
-          contestInvoicesListId: contestInvoicesListData.id,
+          contestEntryListId: contestEntryListData.id,
         });
 
         setCurrentContest({
@@ -102,7 +102,7 @@ const StartPage = () => {
           contestJudgesListId: contestJudgesListData.id,
           contestCategoryListId: contestCategoryListData.id,
           contestGradesListId: contestGradesListData.id,
-          contestInvoicesListId: contestInvoicesListData.id,
+          contestEntryListId: contestEntryListData.id,
         });
 
         // Save the contest data to local storage
@@ -114,7 +114,7 @@ const StartPage = () => {
             contestJudgesListId: contestJudgesListData.id,
             contestCategoryListId: contestCategoryListData.id,
             contestGradesListId: contestGradesListData.id,
-            contestInvoicesListId: contestInvoicesListData.id,
+            contestEntryListId: contestEntryListData.id,
           })
         );
       } else {
