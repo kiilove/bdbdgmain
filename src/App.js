@@ -14,7 +14,7 @@ import JudgeOnlyAdmin from "./pages/onlyadmin/JudgeOnlyAdmin";
 import PromoterOnlyAdmin from "./pages/onlyadmin/PromoterOnlyAdmin";
 import StartPage from "./pages/StartPage";
 import EntryList from "./pages/EntryList";
-import EntryForm from "./pages/EntryForm";
+import EntryManage from "./pages/EntryManage";
 
 function App() {
   return (
@@ -43,8 +43,12 @@ function App() {
                     element={<Home children={<EntryList />} />}
                   />
                   <Route
-                    path="/entryform"
-                    element={<Home children={<EntryForm />} />}
+                    path="/entryadd"
+                    element={<Home children={<EntryManage mode={"add"} />} />}
+                  />
+                  <Route
+                    path="/entrymanage"
+                    element={<Home children={<EntryManage mode={"read"} />} />}
                   />
                   <Route
                     path="/categoryonlyadmin"

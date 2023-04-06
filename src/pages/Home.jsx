@@ -16,8 +16,8 @@ const Home = ({ children }) => {
   };
 
   return (
-    <div className="flex min-w-screen min-h-screen justify-start flex-col md:flex-row md:justify-center p-0 md:p-20  bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900 max-w-screen max-h-screen overflow-x-hidden">
-      <div className="flex text-white w-full justify-start items-center h-14 px-1 md:hidden">
+    <div className="flex min-w-screen min-h-screen justify-start flex-col lg:flex-row lg:justify-center p-0 lg:p-20  bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-sky-700 via-blue-900 to-gray-900 max-w-screen max-h-screen overflow-x-hidden">
+      <div className="flex text-white w-full justify-start items-center h-14 px-1 lg:hidden">
         <div className="flex w-10">
           <button
             onClick={() => handleDrawer()}
@@ -27,7 +27,7 @@ const Home = ({ children }) => {
           </button>
         </div>
         <div className="flex w-full justify-center items-center">
-          <span className="text-gray-100 text-xl font-bold">BDBDg협회</span>
+          <span className="text-gray-100 text-xl font-bold">BDBDg관리자</span>
         </div>
         <div className="flex w-10 h-10">
           <button>
@@ -44,7 +44,7 @@ const Home = ({ children }) => {
       >
         <Drawbar setOpen={handleDrawer} />
       </Drawer>
-      <div className="hidden md:flex w-1/3 justify-end items-start ">
+      <div className="hidden lg:flex w-1/3 justify-end items-start ">
         <Sidebar />
       </div>
       <div className="flex w-full justify-start items-start flex-col p-3 md:px-10 md:py-3">

@@ -182,7 +182,8 @@ const CategoryList = ({ setSelectedTab, mode, setEntryGrades }) => {
   }, [selectedItems]);
 
   useEffect(() => {
-    if (renderMode === "admin") {
+    setSelectedItems([]);
+    if (renderMode !== "choice") {
       return;
     }
     fetchGradePair();

@@ -83,16 +83,10 @@ const CategoryOnlyAdmin = () => {
             <CategoryList setSelectedTab={setSelectedTab} />
           )}
           {selectedTab.id === "종목보기" && (
-            <CategoryManage
-              mode={"read"}
-              categoryIndex={selectedTab.categoryIndex}
-            />
+            <CategoryManage mode={"read"} categoryId={selectedTab.categoryId} />
           )}
           {selectedTab.id === "종목수정" && (
-            <CategoryManage
-              mode={"edit"}
-              categoryIndex={selectedTab.categoryIndex}
-            />
+            <CategoryManage mode={"edit"} categoryId={selectedTab.categoryId} />
           )}
           {selectedTab.id === "종목추가" && <CategoryManage mode={"add"} />}
         </div>

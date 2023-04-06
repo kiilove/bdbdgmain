@@ -7,7 +7,9 @@ import { ReactComponent as AppIcon } from "../assets/svg/gen022.svg";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { CurrentContestContext } from "../contexts/CurrentContestContext";
-import { useFirestoreGetDocument } from "../hooks/useFirestores";
+import { useFirestoreQuery } from "../hooks/useFirestores";
+import { where } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 const EntryList = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,15 +20,16 @@ const EntryList = () => {
 
   const popupMenuRef = useRef(null);
   const { currentContest } = useContext(CurrentContestContext);
-  const getEntryList = useFirestoreGetDocument("contest_entry_list");
+  const getEntryQuery = useFirestoreQuery();
+  const navigate = useNavigate();
 
   const fetchEntryList = async () => {
     try {
-      const fetchData = await getEntryList.getDocument(
-        currentContest.contestEntryListId
-      );
-      if (fetchData.entryPlayers?.length > 0) {
-        setGetEntrysData([...fetchData.entryPlayers]);
+      const fetchData = await getEntryQuery.getDocuments("contest_entry_list", [
+        where("refContestId", "==", currentContest.id),
+      ]);
+      if (fetchData?.length > 0) {
+        setGetEntrysData([...fetchData]);
       }
     } catch (error) {
       console.log(error);
@@ -164,14 +167,50 @@ const EntryList = () => {
         {filterdEntrysData?.length > 0 &&
           filterdEntrysData.map((data, idx) => (
             <div
-              className="flex w-full lg:w-56 text-gray-200 rounded-lg  flex-col gap-y-3 border-gray-600 border-2  hover:cursor-pointer  hover:border-gray-200 "
+              className="flex w-full lg:w-56 text-gray-200 rounded-lg  flex-col gap-y-3 border-gray-600 border-2  hover:cursor-pointer  hover:border-gray-200 box-border"
               style={{
                 backgroundColor: "rgba(11,17,66,0.7)",
                 minHeight: "100px",
               }}
+              onClick={() =>
+                navigate("/entrymanage", {
+                  state: { entryId: data.id, entryList: [...getEntrysData] },
+                })
+              }
             >
-              <div className="flex w-full justify-center items-center h-10  rounded-lg text-sm font-normal lg:text-base lg:font-semibold">
-                {data.judgeName}
+              <div className="flex w-full justify-center items-center rounded-lg text-sm font-normal lg:text-base lg:font-semibold p-2">
+                <div className="flex w-1/3 justify-center items-center">
+                  {data.entryPlayerTitleProfile ? (
+                    <img
+                      src={data.entryPlayerTitleProfile.compressedUrl}
+                      className="w-16 h-16 rounded-lg shadow-sm"
+                    />
+                  ) : (
+                    <img
+                      src="https://firebasestorage.googleapis.com/v0/b/bdbdgmain.appspot.com/o/images%2Fplayer_profiles%2Foriginal%2Fblank_profile.jpeg?alt=media&token=267d6700-3813-45a7-9c5d-d67f84f0c4ea"
+                      className="w-16 h-16 rounded-lg shadow-sm"
+                    />
+                  )}
+                </div>
+                <div className="flex w-2/3">
+                  <div className="flex flex-col w-full ml-3">
+                    <div className="flex">
+                      <span className="font-normal">
+                        {data.entryPlayerName}
+                      </span>
+                    </div>
+                    <div className="flex">
+                      <span className="font-normal">
+                        {data.entryPlayerEmail}
+                      </span>
+                    </div>
+                    <div className="flex">
+                      <span className="font-normal">
+                        {data.entryPlayerPhoneNumber}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div
                 className="flex w-full flex-wrap gap-2 justify-start items-center h-full  rounded-lg text-sm p-3 flex-col"
@@ -179,10 +218,7 @@ const EntryList = () => {
                   backgroundColor: "rgba(11,17,46,0.7)",
                   minHeight: "30px",
                 }}
-              >
-                <div className="flex">{data.judgeEmail}</div>
-                <div className="flex">{data.judgePhoneNumber}</div>
-              </div>
+              ></div>
             </div>
           ))}
       </div>

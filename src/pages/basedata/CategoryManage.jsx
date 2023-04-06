@@ -706,6 +706,7 @@ const CategoryManage = ({ mode, categoryId }) => {
     setGradeArray([...newGradeArray]);
   };
   useEffect(() => {
+    console.log(categoryId);
     if (!categoryGradePair) {
       return;
     }
@@ -713,7 +714,7 @@ const CategoryManage = ({ mode, categoryId }) => {
       setCategoryInfo(initState);
     } else {
       const filterdCategory = categoryGradePair.find(
-        (category) => category.id === categoryId
+        (category) => category.category.id === categoryId
       );
       console.log(filterdCategory);
       setCategoryInfo({
