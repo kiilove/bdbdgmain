@@ -140,9 +140,7 @@ const EntryManage = ({ mode }) => {
   };
 
   const handleEntryInfo = () => {
-    console.log(entryList);
-    console.log(entryId);
-    if (entryList.length > 0) {
+    if (location.state?.entryList?.length > 0) {
       const findEntry = location.state.entryList.find(
         (entry) => entry.id === entryId
       );
@@ -265,10 +263,13 @@ const EntryManage = ({ mode }) => {
   }, [entryInfo]);
 
   useEffect(() => {
-    console.log(entryList);
-    if (renderMode === "add") {
-      return;
-    } else {
+    if (renderMode !== "add" && location.state.entryList.length > 0) {
+      setEntryList([...location.state.entryList]);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    if (entryList.length) {
       handleEntryInfo();
     }
   }, [entryList]);
