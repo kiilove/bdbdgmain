@@ -17,6 +17,8 @@ const ContestsList = ({ group }) => {
         where("contestStatus", "==", "접수중"),
       ]);
 
+      console.log(fetchData);
+
       setGetNotices(fetchData);
     } catch (error) {
       setGetNotices(undefined);

@@ -191,16 +191,16 @@ const CategoryList = ({ setSelectedTab, mode, setEntryGrades }) => {
 
   return (
     <div className="flex w-full h-full flex-col gap-y-5">
-      <ConfirmationModal
-        isOpen={isMessageOpen}
-        onConfirm={handleSavedConfirm}
-        onCancel={handleModalClose}
-        message={message}
-      />
       <div
         className="flex w-full h-full rounded-lg flex-wrap gap-2 box-border justify-between items-start p-5"
         style={{ backgroundColor: "rgba(11,17,66,0.7)" }}
       >
+        <ConfirmationModal
+          isOpen={isMessageOpen}
+          onConfirm={handleSavedConfirm}
+          onCancel={handleModalClose}
+          message={message}
+        />
         <div className="flex justify-between items-center px-2 md:px-5 w-full">
           {renderMode !== "entry" && (
             <div className="flex w-1/2 items-center">

@@ -7,6 +7,7 @@ import {
   useFirestoreUpdateData,
 } from "../hooks/useFirestores";
 import ConfirmationModal from "../messageboxs/ConfirmationModal";
+import useFirebaseStorageUpload from "../hooks/useFirebaseStorageUpload";
 
 const ContestNotice = ({ mode, propContestNoticeId, syncState }) => {
   const [renderMode, setRenderMode] = useState(mode || "edit");
@@ -380,6 +381,82 @@ const ContestNotice = ({ mode, propContestNoticeId, syncState }) => {
     {
       index: 9,
       type: "text",
+      name: "contestStudentFee",
+      id: "contestBasicFee",
+      required: true,
+      value: numberWithCommas(contestNotice.contestStudentFee),
+      disabled: renderMode === "edit" ? false : true,
+      label:
+        renderMode === "edit" ? (
+          <span className="ml-2 h-10 flex items-center">
+            학생부 참가비
+            <span className="text-red-600 text-lg ml-2 align-middle">*</span>
+          </span>
+        ) : (
+          <span className="ml-2 text-gray-500 h-full flex items-center">
+            학생부 참가비
+          </span>
+        ),
+      tailClass:
+        renderMode === "edit"
+          ? "w-32 h-10 rounded-lg px-4 outline-none text-gray-200"
+          : "w-32 rounded-lg px-2 font-semibold outline-none text-gray-200 bg-transparent",
+      inlineStyleBg: renderMode === "edit" ? "rgba(5, 11, 54, 0.7)" : null,
+      externalComponent: (
+        <div className="hidden md:flex ml-2 h-10 w-full items-center gap-x-2">
+          <button
+            className="bg-sky-500 px-2 rounded-lg h-8 w-14"
+            onClick={() =>
+              setContestNotice((prev) => ({
+                ...prev,
+                contestStudentFee:
+                  parseInt(contestNotice.contestStudentFee) + 100000,
+              }))
+            }
+          >
+            <span className="text-gray-200 text-sm font-semibold">+10만</span>
+          </button>
+          <button
+            className="bg-sky-500 px-2 rounded-lg h-8 w-14"
+            onClick={() =>
+              setContestNotice((prev) => ({
+                ...prev,
+                contestStudentFee:
+                  parseInt(contestNotice.contestStudentFee) + 50000,
+              }))
+            }
+          >
+            <span className="text-gray-200 text-sm font-semibold">+5만</span>
+          </button>
+          <button
+            className="bg-sky-500 px-2 rounded-lg h-8 w-14"
+            onClick={() =>
+              setContestNotice((prev) => ({
+                ...prev,
+                contestStudentFee:
+                  parseInt(contestNotice.contestStudentFee) + 10000,
+              }))
+            }
+          >
+            <span className="text-gray-200 text-sm font-semibold">+1만</span>
+          </button>
+          <button
+            className="bg-sky-500 px-2 rounded-lg h-8 w-16"
+            onClick={() =>
+              setContestNotice((prev) => ({
+                ...prev,
+                contestStudentFee: 0,
+              }))
+            }
+          >
+            <span className="text-gray-200 text-sm font-semibold">초기화</span>
+          </button>
+        </div>
+      ),
+    },
+    {
+      index: 10,
+      type: "text",
       name: "contestBasicFee",
       id: "contestBasicFee",
       required: true,
@@ -455,7 +532,7 @@ const ContestNotice = ({ mode, propContestNoticeId, syncState }) => {
     },
 
     {
-      index: 10,
+      index: 11,
       type: "text",
       name: "contestExtraFee",
       id: "contestExtraFee",
@@ -648,6 +725,7 @@ const ContestNotice = ({ mode, propContestNoticeId, syncState }) => {
               <select
                 name="contestStatus"
                 id="contestStatus"
+                defaultValue="접수중"
                 onChange={(e) => handleInputChange(e)}
                 className="w-full h-full text-gray-200 bg-transparent outline-none"
               >
