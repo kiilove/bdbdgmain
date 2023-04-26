@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useContext } from "react";
 
 import { useState } from "react";
@@ -7,6 +7,14 @@ import { JudgeContext } from "../../contexts/JudgeContext";
 const JudgeList = ({ setSelectedTab }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { judgeList, setJudgeList } = useContext(JudgeContext);
+  const [filteredJudges, setFilteredJudges] = useState([judgeList]);
+
+  useEffect(() => {
+    const sortedData = [...judgeList].sort((a, b) =>
+      a.judgeName.localeCompare(b.judgeName)
+    );
+    setFilteredJudges(sortedData);
+  }, [judgeList]);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-5 mt-5">
@@ -29,7 +37,7 @@ const JudgeList = ({ setSelectedTab }) => {
           ></div>
         </div>
         {judgeList?.length > 0 &&
-          judgeList.map((data, idx) => (
+          filteredJudges.map((data, idx) => (
             <div
               className="flex w-full lg:w-56 text-gray-200 rounded-lg  flex-col gap-y-3 border-gray-600 border-2  hover:cursor-pointer  hover:border-gray-200 "
               style={{

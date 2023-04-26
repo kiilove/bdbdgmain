@@ -15,6 +15,7 @@ import PromoterOnlyAdmin from "./pages/onlyadmin/PromoterOnlyAdmin";
 import StartPage from "./pages/StartPage";
 import EntryList from "./pages/EntryList";
 import EntryManage from "./pages/EntryManage";
+import { CategorysGradesContextProvider } from "./contexts/CategoryContext";
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
       <SelectedMenuProvider>
         <JudgeContextProvider>
           <PromoterContextProvider>
-            <CategoryGradePairProvider>
+            <CategorysGradesContextProvider>
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Home />} />
@@ -68,7 +69,7 @@ function App() {
                   />
                 </Routes>
               </BrowserRouter>
-            </CategoryGradePairProvider>
+            </CategorysGradesContextProvider>
           </PromoterContextProvider>
         </JudgeContextProvider>
       </SelectedMenuProvider>

@@ -9,6 +9,7 @@ import { useFirestoreQuery } from "../../hooks/useFirestores";
 import CategoryManage from "../basedata/CategoryManage";
 import CategoryList from "../basedata/CategoryList";
 import Loading from "../Loading";
+import CategoryListV2 from "../basedata/CategoryListV2";
 
 const CategoryOnlyAdmin = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +81,7 @@ const CategoryOnlyAdmin = () => {
       {
         <div className="flex w-full mt-5">
           {selectedTab.id === "전체목록" && (
-            <CategoryList setSelectedTab={setSelectedTab} />
+            <CategoryListV2 setSelectedTab={setSelectedTab} />
           )}
           {selectedTab.id === "종목보기" && (
             <CategoryManage mode={"read"} categoryId={selectedTab.categoryId} />

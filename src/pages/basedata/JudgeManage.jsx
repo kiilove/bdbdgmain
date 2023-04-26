@@ -14,7 +14,7 @@ import { JudgeContext } from "../../contexts/JudgeContext";
 
 const JudgeManage = ({ mode, judgeId }) => {
   const [renderMode, setRenderMode] = useState(mode || "edit");
-  const [judgeInfo, setJudgeInfo] = useState({});
+  const [judgeInfo, setJudgeInfo] = useState({ judgePassword: "123456" });
   const [files, setFiles] = useState([]);
   const [message, setMessage] = useState({});
   const [isMessageOpen, setIsMessageOpen] = useState(false);
@@ -22,8 +22,6 @@ const JudgeManage = ({ mode, judgeId }) => {
   const updateJudge = useFirestoreUpdateData("judge_pool");
   const uploadFiles = useFirebaseStorage(files, "image/judge/profiles");
   const { judgeList, setJudgeList } = useContext(JudgeContext);
-
-  console.log(judgeId);
 
   const [selectedTab, setSelectedTab] = useState({
     id: "전체목록",
@@ -108,7 +106,7 @@ const JudgeManage = ({ mode, judgeId }) => {
 
       setMessage({
         title: "오류",
-        body: "협회(전체이름)은 필수항목입니다.",
+        body: "심판 이름은 필수항목입니다.",
         isButton: true,
         confirmButtonText: "확인",
         cancelButtonText: "",
@@ -163,6 +161,7 @@ const JudgeManage = ({ mode, judgeId }) => {
       index: 1,
       type: "text",
       name: "judgeName",
+      lang: "ko",
       id: "judgeName",
       required: true,
       value: judgeInfo.judgeName,
@@ -221,6 +220,7 @@ const JudgeManage = ({ mode, judgeId }) => {
       name: "judgePromoter",
       id: "judgePromoter",
       required: true,
+      lang: "ko",
       value: judgeInfo.judgePromoter,
       disabled: renderMode === "edit" || renderMode === "add" ? false : true,
       label:
