@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { CurrentContestContext } from "../../contexts/CurrentContestContext";
 import {
   useFirestoreGetDocument,
+  useFirestoreQuery,
   useFirestoreUpdateData,
 } from "../../hooks/useFirestores";
 import ConfirmationModal from "../../messageboxs/ConfirmationModal";
@@ -17,12 +18,24 @@ import { CategorysGradesContext } from "../../contexts/CategoryContext";
 
 const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
   const [renderMode, setRenderMode] = useState(mode || "admin");
-  const { currentContest } = useContext(CurrentContestContext);
+  const { getDocument: contestCategorys } = useFirestoreGetDocument(
+    "contest_categorys_list"
+  );
+  const { getDocument: contestGrades } = useFirestoreGetDocument(
+    "contest_grades_list"
+  );
+  const { updateData: contestCategorysUpdateData } = useFirestoreUpdateData(
+    "contest_categorys_list"
+  );
+  const { updateData: contestGradesUpdateData } = useFirestoreUpdateData(
+    "contest_grades_list"
+  );
 
+  const { currentContest } = useContext(CurrentContestContext);
   const { categoryList, gradeList, forceReloadFromDatabase, loading } =
     useContext(CategorysGradesContext);
-  const [isLoading, setIsLoading] = useState(true);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [allChecked, setAllChecked] = useState(false);
   const [selectedItems, setSelectedItems] = useState({
     categorys: [],
@@ -46,10 +59,6 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
       }
     }
   }, [categoryList]);
-
-  const handleSavedConfirm = async () => {
-    setIsMessageOpen(false);
-  };
 
   const handleModalClose = () => {
     setIsMessageOpen(false);
@@ -93,7 +102,6 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
     const isExistCategory = selectedItems.categorys.some(
       (category) => category.id === refCategoryId
     );
-    console.log(isExistGrade);
 
     if (!isExistGrade) {
       const newGradeItem = gradeList.filter((grade) => grade.id === gradeId);
@@ -117,7 +125,7 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
       const newGrade = selectedItems.grades.filter(
         (grade) => grade.id !== gradeId
       );
-      console.log(newGrade);
+
       const isNotLastGrade = newGrade.some(
         (grade) => grade.refCategoryId === refCategoryId
       );
@@ -130,9 +138,81 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
     }
   };
 
+  const handleSaveSelectedItems = async () => {
+    const categorys = [...selectedItems.categorys];
+    const grades = [...selectedItems.grades];
+
+    try {
+      await contestCategorysUpdateData(currentContest.contestCategorysListId, {
+        categorys: [...categorys],
+      });
+      await contestGradesUpdateData(currentContest.contestGradesListId, {
+        grades: [...grades],
+      });
+      setIsMessageOpen(true);
+      setMessage({
+        title: "저장",
+        body: "개최 종목이 업데이트 되었습니다.",
+        isButton: true,
+        confirmButtonText: "확인",
+        cancelButtonText: "",
+      });
+    } catch (error) {
+      setIsMessageOpen(true);
+      setMessage({
+        title: "삭제오류",
+        body: "오류가 발생했습니다.",
+        body2: "다시 시도하세요.",
+        isButton: true,
+        confirmButtonText: "확인",
+        cancelButtonText: "",
+      });
+    }
+  };
+
+  const handleRedirectManagePage = (categoryId) => {
+    if (renderMode === "admin") {
+      setSelectedTab({ id: "종목보기", categoryId });
+    }
+  };
+
+  const fetchedContestCategorysGrades = async () => {
+    if (
+      !currentContest.contestCategorysListId &&
+      !currentContest.contestGradesListId
+    ) {
+      setIsMessageOpen(true);
+      setMessage({
+        title: "오류",
+        body: "기초데이터에 문제가 있습니다.",
+        body2: "다시 시도하세요.",
+        isButton: true,
+        confirmButtonText: "확인",
+        cancelButtonText: "",
+      });
+    } else {
+      const fetchCategorys = await contestCategorys(
+        currentContest.contestCategorysListId
+      );
+      const fetchGrades = await contestGrades(
+        currentContest.contestGradesListId
+      );
+
+      console.log(fetchCategorys);
+
+      setSelectedItems({
+        categorys: [...fetchCategorys.categorys],
+        grades: [...fetchGrades.grades],
+      });
+    }
+  };
   useEffect(() => {
     console.log(selectedItems);
   }, [selectedItems]);
+
+  useEffect(() => {
+    fetchedContestCategorysGrades();
+  }, []);
 
   return (
     <div className="flex w-full h-full flex-col gap-y-5">
@@ -142,7 +222,7 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
       >
         <ConfirmationModal
           isOpen={isMessageOpen}
-          onConfirm={handleSavedConfirm}
+          onConfirm={handleModalClose}
           onCancel={handleModalClose}
           message={message}
         />
@@ -180,7 +260,10 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
 
           <div className="flex w-1/2 h-full items-center justify-end">
             {renderMode === "choice" && (
-              <button className="bg-gray-200 px-4 h-10 rounded-lg">
+              <button
+                className="bg-gray-200 px-4 h-10 rounded-lg"
+                onClick={() => handleSaveSelectedItems()}
+              >
                 <span className="text-gray-900 font-semibold">저장</span>
               </button>
             )}
@@ -199,7 +282,8 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
         )}
 
         {loading && <Loading />}
-        {filteredCategory?.length > 0 &&
+        {renderMode !== "admin" &&
+          filteredCategory?.length > 0 &&
           filteredCategory.map((category) => {
             const filteredGrades = gradeList.filter(
               (grade) => grade.refCategoryId === category.id
@@ -207,7 +291,7 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
 
             return (
               <div
-                className={`flex w-full lg:w-56 text-gray-200 rounded-lg flex-col gap-y-3 hover:cursor-pointer 
+                className={`flex w-full lg:w-56 text-gray-200 rounded-lg flex-col gap-y-3 
                 ${
                   selectedItems.categorys.some(
                     (categoryItem) => categoryItem.id === category.id
@@ -254,6 +338,45 @@ const CategoryListV2 = ({ setSelectedTab, mode, setEntryGrades }) => {
                       >
                         {grade.gradeTitle}
                       </button>
+                    ))}
+                </div>
+              </div>
+            );
+          })}
+
+        {renderMode === "admin" &&
+          categoryList?.length > 0 &&
+          categoryList.map((category) => {
+            const filteredGrades = gradeList.filter(
+              (grade) => grade.refCategoryId === category.id
+            );
+
+            return (
+              <div
+                className="flex w-full lg:w-56 text-gray-200 rounded-lg flex-col gap-y-3 hover:cursor-pointer border-gray-600 border-2"
+                onClick={() => handleRedirectManagePage(category.id)}
+                style={{
+                  backgroundColor: "rgba(11,17,66,0.7)",
+                  minHeight: "100px",
+                }}
+              >
+                <div
+                  className={`flex w-full justify-center items-center h-10 rounded-lg text-sm font-normal lg:text-base lg:font-semibold `}
+                >
+                  {category.categoryTitle}
+                </div>
+                <div
+                  className="flex w-full flex-wrap gap-2 justify-start items-center h-full rounded-lg text-sm p-3"
+                  style={{
+                    backgroundColor: "rgba(11,17,46,0.7)",
+                    minHeight: "30px",
+                  }}
+                >
+                  {filteredGrades.length > 0 &&
+                    filteredGrades.map((grade, gIndx) => (
+                      <div className="rounded-lg px-4 py-1 bg-gray-700">
+                        {grade.gradeTitle}
+                      </div>
                     ))}
                 </div>
               </div>

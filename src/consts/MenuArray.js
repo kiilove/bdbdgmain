@@ -23,7 +23,7 @@ export const Menus = [
       { index: 1, title: "참가신청서 대리작성", link: "/entryadd" },
       { index: 2, title: "종목 진행순서", link: "/" },
       { index: 3, title: "심판배정", link: "/" },
-      { index: 4, title: "수동모드 선수등록", link: "/manualplayeradd" },
+      { index: 4, title: "수동모드 선수등록", link: "/manualplayeronlyadmin" },
       { index: 5, title: "확정명단", link: "/" },
     ],
   },

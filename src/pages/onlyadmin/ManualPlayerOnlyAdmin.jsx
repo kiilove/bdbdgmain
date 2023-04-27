@@ -4,23 +4,53 @@ import { useRef } from "react";
 import { useContext } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CategoryGradePairContext } from "../../contexts/CategoryGradePairContext";
 import { useFirestoreQuery } from "../../hooks/useFirestores";
-import CategoryManage from "../basedata/CategoryManage";
-import CategoryList from "../basedata/CategoryList";
+
 import Loading from "../Loading";
-import CategoryListV2 from "../basedata/CategoryListV2";
-import CategoryManageV2 from "../basedata/CategoryManageV2";
 
-const CategoryOnlyAdmin = () => {
-  const [isLoading, setIsLoading] = useState(false);
+import { JudgeContext } from "../../contexts/JudgeContext";
+import manualPlayerList from "../basedata/ManualPlayerList";
+import JudgeManage from "../basedata/JudgeManage";
+import { ManualPlayerContext } from "../../contexts/ManualPlayerContext";
+import { where } from "firebase/firestore";
+import { CurrentContestContext } from "../../contexts/CurrentContestContext";
+import ManualPlayerList from "../basedata/ManualPlayerList";
+import ManualPlayerManage from "../basedata/ManualPlayerManage";
+
+const ManualPlayerOnlyAdmin = ({ mode }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [getJudges, setGetJudges] = useState([]);
 
-  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState({
     id: "전체목록",
     text: "전체목록",
   });
+
+  const { manualPlayerList, setManualPlayerList } =
+    useContext(ManualPlayerContext);
+
+  const { currentCotenst } = useContext(CurrentContestContext);
+
+  const manualPlayerQuery = useFirestoreQuery();
+
+  const fetchManual = async () => {
+    try {
+      const fetchData = await manualPlayerQuery.getDocuments(
+        "manual_player_pool"
+      );
+
+      setManualPlayerList(fetchData);
+    } catch (error) {
+      setManualPlayerList(undefined);
+      console.error(error.code);
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const navigate = useNavigate();
   const tabs = [
     {
       id: "전체목록",
@@ -28,8 +58,8 @@ const CategoryOnlyAdmin = () => {
     },
 
     {
-      id: "종목추가",
-      text: "종목추가",
+      id: "선수추가",
+      text: "선수추가",
     },
   ];
 
@@ -39,6 +69,10 @@ const CategoryOnlyAdmin = () => {
       return acc;
     }, {})
   );
+
+  useEffect(() => {
+    fetchManual();
+  }, []);
 
   function handleTabClick(tab) {
     setSelectedTab(tab);
@@ -52,7 +86,7 @@ const CategoryOnlyAdmin = () => {
       >
         <div className="flex  w-full px-2 md:px-5 flex-col ">
           <span className="text-white p-5 font-semibold md:text-lg">
-            종목/체급
+            수동모드 선수관리
           </span>
           {isLoading && <Loading />}
 
@@ -80,27 +114,21 @@ const CategoryOnlyAdmin = () => {
         </div>
       </div>
       {
-        <div className="flex w-full mt-5">
-          {selectedTab.id === "전체목록" && (
-            <CategoryListV2 setSelectedTab={setSelectedTab} mode={"admin"} />
+        <div className="flex w-full">
+          {selectedTab.id === "전체목록" && manualPlayerList?.length > 0 && (
+            <ManualPlayerList setSelectedTab={setSelectedTab} />
           )}
-          {selectedTab.id === "종목보기" && (
-            <CategoryManageV2
-              mode={"read"}
-              categoryId={selectedTab.categoryId}
-            />
+          {selectedTab.id === "선수정보" && manualPlayerList?.length > 0 && (
+            <ManualPlayerManage mode={"read"} playerId={selectedTab.playerId} />
           )}
-          {selectedTab.id === "종목수정" && (
-            <CategoryManageV2
-              mode={"edit"}
-              categoryId={selectedTab.categoryId}
-            />
+          {selectedTab.id === "선수수정" && manualPlayerList?.length > 0 && (
+            <ManualPlayerManage mode={"edit"} playerId={selectedTab.playerId} />
           )}
-          {selectedTab.id === "종목추가" && <CategoryManage mode={"add"} />}
+          {selectedTab.id === "선수추가" && <ManualPlayerManage mode={"add"} />}
         </div>
       }
     </div>
   );
 };
 
-export default CategoryOnlyAdmin;
+export default ManualPlayerOnlyAdmin;

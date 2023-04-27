@@ -9,6 +9,11 @@ const ConfirmationModal = ({ isOpen, onConfirm, onCancel, message }) => {
   const handleCancelClick = () => {
     onCancel();
   };
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      handleCancelClick();
+    }
+  };
   return (
     <div>
       <Modal open={isOpen} onClose={handleCancelClick}>
@@ -17,6 +22,7 @@ const ConfirmationModal = ({ isOpen, onConfirm, onCancel, message }) => {
           style={{
             transform: "translate(-50%, -50%)",
           }}
+          onKeyDown={handleKeyDown}
         >
           <div className="flex flex-col gap-y-2 text-black items-center">
             <h2 className="font-semibold">{message.body}</h2>

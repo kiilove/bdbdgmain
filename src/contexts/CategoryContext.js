@@ -1,6 +1,7 @@
 import React, { createContext, useState } from "react";
 import { useFirestoreQuery } from "../hooks/useFirestores";
 import { useEffect } from "react";
+import { orderBy } from "firebase/firestore";
 
 export const CategorysGradesContext = createContext();
 
@@ -13,10 +14,12 @@ export const CategorysGradesContextProvider = ({ children }) => {
 
   const fetchDataFromDatabase = async () => {
     setLoading(true);
+    const categoryCondition = [orderBy("categoryIndex")];
+    const gradeCondition = [orderBy("gradeIndex")];
     try {
       const [categorys, grades] = await Promise.all([
-        categoryQuery.getDocuments("category_pool"),
-        gradeQuery.getDocuments("grade_pool"),
+        categoryQuery.getDocuments("category_pool", categoryCondition),
+        gradeQuery.getDocuments("grade_pool", gradeCondition),
       ]);
       console.log(categorys);
       return { categoryList: [...categorys], gradeList: [...grades] };
@@ -58,8 +61,6 @@ export const CategorysGradesContextProvider = ({ children }) => {
     fetchDataFromLocalStorage();
     if (categoryList === [] || gradeList === []) {
       forceReloadFromDatabase();
-    } else {
-      fetchDataFromLocalStorage();
     }
   }, []);
 

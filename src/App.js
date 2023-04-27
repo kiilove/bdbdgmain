@@ -16,6 +16,9 @@ import StartPage from "./pages/StartPage";
 import EntryList from "./pages/EntryList";
 import EntryManage from "./pages/EntryManage";
 import { CategorysGradesContextProvider } from "./contexts/CategoryContext";
+import { ManualPlayerContextProvider } from "./contexts/ManualPlayerContext";
+import ManualPlayerList from "./pages/basedata/ManualPlayerList";
+import ManualPlayerOnlyAdmin from "./pages/onlyadmin/ManualPlayerOnlyAdmin";
 
 function App() {
   return (
@@ -23,53 +26,67 @@ function App() {
       <SelectedMenuProvider>
         <JudgeContextProvider>
           <PromoterContextProvider>
-            <CategorysGradesContextProvider>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route
-                    path="/startcontest"
-                    element={<Home children={<StartPage />} />}
-                  />
-                  <Route
-                    path="/contestlistpre"
-                    element={<Home children={<ContestsList group={"pre"} />} />}
-                  />
-                  <Route
-                    path="/contestnotice"
-                    element={<Home children={<ContestNotice />} />}
-                  />
-                  <Route
-                    path="/entrylist"
-                    element={<Home children={<EntryList />} />}
-                  />
-                  <Route
-                    path="/entryadd"
-                    element={<Home children={<EntryManage mode={"add"} />} />}
-                  />
-                  <Route
-                    path="/entrymanage"
-                    element={<Home children={<EntryManage mode={"read"} />} />}
-                  />
-                  <Route
-                    path="/categoryonlyadmin"
-                    element={<Home children={<CategoryOnlyAdmin />} />}
-                  />
-                  <Route
-                    path="/promoteronlyadmin"
-                    element={<Home children={<PromoterOnlyAdmin />} />}
-                  />
-                  <Route
-                    path="/judgeonlyadmin"
-                    element={<Home children={<JudgeOnlyAdmin />} />}
-                  />
-                  <Route
-                    path="/contestview/:contestId"
-                    element={<Home children={<ContestView />} />}
-                  />
-                </Routes>
-              </BrowserRouter>
-            </CategorysGradesContextProvider>
+            <CategoryGradePairProvider>
+              <CategorysGradesContextProvider>
+                <ManualPlayerContextProvider>
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route
+                        path="/startcontest"
+                        element={<Home children={<StartPage />} />}
+                      />
+                      <Route
+                        path="/contestlistpre"
+                        element={
+                          <Home children={<ContestsList group={"pre"} />} />
+                        }
+                      />
+                      <Route
+                        path="/contestnotice"
+                        element={<Home children={<ContestNotice />} />}
+                      />
+                      <Route
+                        path="/entrylist"
+                        element={<Home children={<EntryList />} />}
+                      />
+                      <Route
+                        path="/manualplayeronlyadmin"
+                        element={<Home children={<ManualPlayerOnlyAdmin />} />}
+                      />
+                      <Route
+                        path="/entryadd"
+                        element={
+                          <Home children={<EntryManage mode={"add"} />} />
+                        }
+                      />
+                      <Route
+                        path="/entrymanage"
+                        element={
+                          <Home children={<EntryManage mode={"read"} />} />
+                        }
+                      />
+                      <Route
+                        path="/categoryonlyadmin"
+                        element={<Home children={<CategoryOnlyAdmin />} />}
+                      />
+                      <Route
+                        path="/promoteronlyadmin"
+                        element={<Home children={<PromoterOnlyAdmin />} />}
+                      />
+                      <Route
+                        path="/judgeonlyadmin"
+                        element={<Home children={<JudgeOnlyAdmin />} />}
+                      />
+                      <Route
+                        path="/contestview/:contestId"
+                        element={<Home children={<ContestView />} />}
+                      />
+                    </Routes>
+                  </BrowserRouter>
+                </ManualPlayerContextProvider>
+              </CategorysGradesContextProvider>
+            </CategoryGradePairProvider>
           </PromoterContextProvider>
         </JudgeContextProvider>
       </SelectedMenuProvider>

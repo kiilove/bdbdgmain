@@ -15,9 +15,12 @@ const StartPage = () => {
   const updateContest = useFirestoreUpdateData("contests");
   const contestNoticeHook = useFirestoreAddData("contest_notice");
   const contestJudgesListHook = useFirestoreAddData("contest_judges_list");
-  const contestCategoryListHook = useFirestoreAddData("contest_category_list");
+  const contestCategorysListHook = useFirestoreAddData(
+    "contest_categorys_list"
+  );
   const contestGradesListHook = useFirestoreAddData("contest_grades_list");
-  const contestEntryListHook = useFirestoreAddData("contest_entry_list");
+  const contestEntrysListHook = useFirestoreAddData("contest_entrys_list");
+  const contestInvoicesListHook = useFirestoreAddData("contest_entrys_list");
   const { setCurrentContest } = useContext(CurrentContestContext);
   const navigate = useNavigate();
 
@@ -30,13 +33,15 @@ const StartPage = () => {
       const [
         contestNoticeData,
         contestJudgesListData,
-        contestCategoryListData,
+        contestCategorysListData,
         contestGradesListData,
-        contestEntryListData,
+        contestEntrysListData,
+        contestInvoicesListData,
       ] = await Promise.all([
         contestNoticeHook
           .addData({
             refContestId: addedContest.id,
+            contestStauts: "접수중",
           })
           .catch((error) => {
             console.error("Error adding contest notice:", error);
@@ -45,16 +50,16 @@ const StartPage = () => {
         contestJudgesListHook
           .addData({
             refContestId: addedContest.id,
-            judgeIds: [],
+            judges: [],
           })
           .catch((error) => {
             console.error("Error adding contest judges list:", error);
             return null;
           }),
-        contestCategoryListHook
+        contestCategorysListHook
           .addData({
             refContestId: addedContest.id,
-            categoryIds: [],
+            categorys: [],
           })
           .catch((error) => {
             console.error("Error adding contest category list:", error);
@@ -63,16 +68,25 @@ const StartPage = () => {
         contestGradesListHook
           .addData({
             refContestId: addedContest.id,
-            categoryIds: [],
+            grades: [],
           })
           .catch((error) => {
             console.error("Error adding contest grades list:", error);
             return null;
           }),
-        contestEntryListHook
+        contestEntrysListHook
           .addData({
             refContestId: addedContest.id,
-            entryIds: [],
+            entrys: [],
+          })
+          .catch((error) => {
+            console.error("Error adding contest invoices list:", error);
+            return null;
+          }),
+        contestInvoicesListHook
+          .addData({
+            refContestId: addedContest.id,
+            invoices: [],
           })
           .catch((error) => {
             console.error("Error adding contest invoices list:", error);
@@ -84,25 +98,28 @@ const StartPage = () => {
       if (
         contestNoticeData &&
         contestJudgesListData &&
-        contestCategoryListData &&
+        contestCategorysListData &&
         contestGradesListData &&
-        contestEntryListData
+        contestEntrysListData &&
+        contestInvoicesListData
       ) {
         await updateContest.updateData(addedContest.id, {
           contestNoticeId: contestNoticeData.id,
           contestJudgesListId: contestJudgesListData.id,
-          contestCategoryListId: contestCategoryListData.id,
+          contestCategorysListId: contestCategorysListData.id,
           contestGradesListId: contestGradesListData.id,
-          contestEntryListId: contestEntryListData.id,
+          contestEntrysListId: contestEntrysListData.id,
+          contestInvoicesListId: contestInvoicesListData.id,
         });
 
         setCurrentContest({
           contestId: addedContest.id,
           contestNoticeId: contestNoticeData.id,
           contestJudgesListId: contestJudgesListData.id,
-          contestCategoryListId: contestCategoryListData.id,
+          contestCategorysListId: contestCategorysListData.id,
           contestGradesListId: contestGradesListData.id,
-          contestEntryListId: contestEntryListData.id,
+          contestEntrysListId: contestEntrysListData.id,
+          contestInvociesListId: contestInvoicesListData.id,
         });
 
         // Save the contest data to local storage
@@ -112,9 +129,10 @@ const StartPage = () => {
             contestId: addedContest.id,
             contestNoticeId: contestNoticeData.id,
             contestJudgesListId: contestJudgesListData.id,
-            contestCategoryListId: contestCategoryListData.id,
+            contestCategorysListId: contestCategorysListData.id,
             contestGradesListId: contestGradesListData.id,
-            contestEntryListId: contestEntryListData.id,
+            contestEntrysListId: contestEntrysListData.id,
+            contestInvociesListId: contestInvoicesListData.id,
           })
         );
       } else {
