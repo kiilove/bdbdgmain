@@ -525,7 +525,6 @@ const CategoryManage = ({ mode, categoryId }) => {
 
     const gradeIndex = gradeArray?.length ? gradeArray.length + 1 : 1;
     setGradeArray([...gradeArray, { ...gradeInfo, gradeIndex }]);
-    console.log(gradeArray);
   };
   const handleEditGrade = (gradeId) => {
     if (gradeInfo.gradeTitle === "" || gradeInfo.gradeTitle === undefined) {
@@ -551,10 +550,6 @@ const CategoryManage = ({ mode, categoryId }) => {
       gradeMinValue: "",
       gradeMaxValue: "",
     });
-    //const gradeIndex = gradeArray?.length ? gradeArray.length + 1 : 1;
-
-    //setGradeArray([...gradeArray, { ...gradeInfo, gradeIndex }]);
-    console.log(gradeArray);
   };
   const categoryInputRender = (
     <div className="flex w-full flex-col gap-y-0 md:gap-y-5 md:px-5">
@@ -819,7 +814,7 @@ const CategoryManage = ({ mode, categoryId }) => {
                 {gradeArray.length > 0 &&
                   gradeArray.map((grade, gIdx) => (
                     <div
-                      className="w-20 h-8 bg-sky-700 p-2 text-gray-200 rounded-lg flex justify-center items-center"
+                      className="w-auto h-8 bg-sky-700 p-2 text-gray-200 rounded-lg flex justify-center items-center"
                       onClick={() => handleGradeSelect(gIdx)}
                     >
                       <span>{grade.gradeTitle}</span>
@@ -847,7 +842,7 @@ const CategoryManage = ({ mode, categoryId }) => {
                 {gradeArray.length > 0 &&
                   gradeArray.map((grade, gIdx) => (
                     <button
-                      className="w-20 h-8 bg-sky-600 p-2 text-gray-200 rounded-lg flex justify-center items-center"
+                      className="w-auto h-8 bg-sky-600 p-2 text-gray-200 rounded-lg flex justify-center items-center"
                       onClick={() => handleGradeSelect(gIdx)}
                     >
                       <span>{grade.gradeTitle}</span>
@@ -867,7 +862,7 @@ const CategoryManage = ({ mode, categoryId }) => {
                 {gradeArray.length > 0 &&
                   gradeArray.map((grade, gIdx) => (
                     <div
-                      className="w-20 h-8 bg-sky-700 p-2 text-gray-200 rounded-lg flex justify-center items-center"
+                      className="w-auto px-5 h-8 bg-sky-700 py-2 text-gray-200 rounded-lg flex justify-center items-center"
                       onClick={() => handleGradeSelect(gIdx)}
                     >
                       <span>{grade.gradeTitle}</span>
